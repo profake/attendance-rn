@@ -6,47 +6,50 @@ import {
   TextInput,
   Pressable,
   FlatList,
+  TouchableOpacity,
 } from "react-native";
 import { Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v1 as uuidv1 } from "uuid";
 
-const Courses = () => {
-  const [courseData, setCourseData] = useState(null);
+const Batches = ({navigation}) => {
+  const [batchData, setBatchData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [courseName, onChangeCourseName] = useState("");
-  const [courseCode, onChangeCourseCode] = useState("");
+  const [batchName, onChangeBatchName] = useState("");
 
-  const handleAddEntry = async (courseCode, courseName) => {
+  const handleAddEntry = async (batchName) => {
     let id = uuidv1();
-    let course = {
+    let batch = {
       id,
-      courseName,
-      courseCode,
-      batches: [],
+      batchName,
+      students: [],
     };
     try {
-      let value = await AsyncStorage.getItem("Courses");
+      let value = await AsyncStorage.getItem("Batches");
       value = JSON.parse(value);
-      if (value) value.push(course);
-      else value = [course];
-      await AsyncStorage.setItem("Courses", JSON.stringify(value));
-      setCourseData(value);
+      if (value) value.push(batch);
+      else value = [batch];
+      await AsyncStorage.setItem("Batches", JSON.stringify(value));
+      setBatchData(value);
     } catch (e) {
       console.log(e.message);
     }
   };
 
+  const showBatchInfo = (batchId, batchName) => {
+    navigation.navigate("BatchInfo", {batchId, batchName})
+  }
+
   useEffect(() => {
     getData();
-  }, [courseData?.length]);
+  }, [batchData?.length]);
 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem("Courses");
+      const value = await AsyncStorage.getItem("Batches");
       if (value !== null) {
         console.log("Set value: " + value);
-        setCourseData(JSON.parse(value));
+        setBatchData(JSON.parse(value));
       } else {
         console.log("value not found");
       }
@@ -67,18 +70,12 @@ const Courses = () => {
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.textHeader}>Add Course</Text>
+          <Text style={styles.textHeader}>Add Batch</Text>
           <TextInput
             style={styles.textInput}
-            onChangeText={onChangeCourseCode}
-            value={courseCode}
-            placeholder="Course Code"
-          />
-          <TextInput
-            style={styles.textInput}
-            onChangeText={onChangeCourseName}
-            value={courseName}
-            placeholder="Course Name"
+            onChangeText={onChangeBatchName}
+            value={batchName}
+            placeholder="Batch Name"
           />
           <View style={styles.buttonContainer}>
             <Pressable
@@ -91,7 +88,7 @@ const Courses = () => {
               style={[styles.button]}
               onPress={() => {
                 setModalVisible(!modalVisible);
-                handleAddEntry(courseCode, courseName);
+                handleAddEntry(batchName);
               }}
             >
               <Text style={styles.textStyle}>Add Entry</Text>
@@ -100,23 +97,22 @@ const Courses = () => {
         </View>
       </Modal>
 
-      {courseData ? (
+      {batchData ? (
         <FlatList
-          style={{width: "100%", height: "80%"}}
-          data={courseData}
+          style={{ width: "100%", height: "80%" }}
+          data={batchData}
           keyExtractor={(course) => course.id}
           renderItem={({ item }) => (
-            <View style={styles.courseContainer}>
-              <Text style={styles.courseTextStyle}>{item.courseName}</Text>
-              <Text style={[styles.courseTextStyle, styles.smallText]}>{item.courseCode}</Text>
-            </View>
+            <TouchableOpacity style={styles.courseContainer} onPress={() => showBatchInfo(item.id, item.batchName)}>
+              <Text style={styles.courseTextStyle}>{item.batchName}</Text>
+            </TouchableOpacity>
           )}
         ></FlatList>
       ) : (
-        <Text style={styles.text}>No courses found.</Text>
+        <Text style={styles.text}>No batches found.</Text>
       )}
       <Pressable style={styles.button} onPress={() => setModalVisible(true)}>
-        <Text style={styles.textStyle}>Add Course</Text>
+        <Text style={styles.textStyle}>Add Batch</Text>
       </Pressable>
     </View>
   );
@@ -213,4 +209,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Courses;
+export default Batches;

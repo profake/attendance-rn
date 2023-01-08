@@ -1,59 +1,57 @@
-import { useState, useEffect } from "react";
 import {
-  View,
-  Text,
   StyleSheet,
-  TextInput,
+  Text,
+  View,
   Pressable,
+  Modal,
+  TouchableOpacity,
   FlatList,
+  TextInput,
 } from "react-native";
-import { Modal } from "react-native";
+import { React, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v1 as uuidv1 } from "uuid";
 
-const Courses = () => {
-  const [courseData, setCourseData] = useState(null);
+const BatchInfo = ({ route, navigation }) => {
+  const [studentData, setStudentData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [courseName, onChangeCourseName] = useState("");
-  const [courseCode, onChangeCourseCode] = useState("");
+  const [studentId, onChangeStudentId] = useState();
+  const { batchId, batchName } = route.params;
 
-  const handleAddEntry = async (courseCode, courseName) => {
-    let id = uuidv1();
-    let course = {
-      id,
-      courseName,
-      courseCode,
-      batches: [],
-    };
+  const handleAddSingleStudent = async (studentId) => {
     try {
-      let value = await AsyncStorage.getItem("Courses");
-      value = JSON.parse(value);
-      if (value) value.push(course);
-      else value = [course];
-      await AsyncStorage.setItem("Courses", JSON.stringify(value));
-      setCourseData(value);
-    } catch (e) {
-      console.log(e.message);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, [courseData?.length]);
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Courses");
+      const value = await AsyncStorage.getItem("Batches");
       if (value !== null) {
-        console.log("Set value: " + value);
-        setCourseData(JSON.parse(value));
+        let parsedValues = JSON.parse(value);
+        const index = parsedValues.findIndex((item) => item.id === batchId);
+        parsedValues[index].students.push(studentId);
+        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
       } else {
-        console.log("value not found");
+        console.log("Error: No batches found");
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("Batches");
+      if (value !== null) {
+        let batchInfo = JSON.parse(value);
+        batchInfo = batchInfo.filter((item) => item.id === batchId);
+        setStudentData(batchInfo[0].students);
+        console.log("Set follwing: " + batchInfo[0].students);
+      } else {
+        console.log("Error: No batches found");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, [studentData?.length]);
 
   return (
     <View style={styles.container}>
@@ -67,18 +65,12 @@ const Courses = () => {
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.textHeader}>Add Course</Text>
+          <Text style={styles.textHeader}>Add Student</Text>
           <TextInput
             style={styles.textInput}
-            onChangeText={onChangeCourseCode}
-            value={courseCode}
-            placeholder="Course Code"
-          />
-          <TextInput
-            style={styles.textInput}
-            onChangeText={onChangeCourseName}
-            value={courseName}
-            placeholder="Course Name"
+            onChangeText={onChangeStudentId}
+            value={studentId}
+            placeholder="Student ID"
           />
           <View style={styles.buttonContainer}>
             <Pressable
@@ -91,7 +83,7 @@ const Courses = () => {
               style={[styles.button]}
               onPress={() => {
                 setModalVisible(!modalVisible);
-                handleAddEntry(courseCode, courseName);
+                handleAddSingleStudent(studentId);
               }}
             >
               <Text style={styles.textStyle}>Add Entry</Text>
@@ -100,27 +92,29 @@ const Courses = () => {
         </View>
       </Modal>
 
-      {courseData ? (
+      <Text style={styles.textHeader}>{batchName}</Text>
+      {studentData && studentData.length !== 0 ? (
         <FlatList
-          style={{width: "100%", height: "80%"}}
-          data={courseData}
-          keyExtractor={(course) => course.id}
+          style={{ width: "100%", height: "80%" }}
+          data={studentData}
+          keyExtractor={(student) => student}
           renderItem={({ item }) => (
-            <View style={styles.courseContainer}>
-              <Text style={styles.courseTextStyle}>{item.courseName}</Text>
-              <Text style={[styles.courseTextStyle, styles.smallText]}>{item.courseCode}</Text>
-            </View>
+            <TouchableOpacity style={styles.courseContainer}>
+              <Text style={styles.courseTextStyle}>{item}</Text>
+            </TouchableOpacity>
           )}
         ></FlatList>
       ) : (
-        <Text style={styles.text}>No courses found.</Text>
+        <Text style={styles.text}>No students found under this batch.</Text>
       )}
       <Pressable style={styles.button} onPress={() => setModalVisible(true)}>
-        <Text style={styles.textStyle}>Add Course</Text>
+        <Text style={styles.textStyle}>Add Students</Text>
       </Pressable>
     </View>
   );
 };
+
+export default BatchInfo;
 
 const styles = StyleSheet.create({
   container: {
@@ -212,5 +206,3 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 });
-
-export default Courses;

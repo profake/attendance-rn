@@ -1,9 +1,12 @@
-import { Text } from "react-native"
+import { View, Button, Text } from "react-native";
 
-const Home = () => {
+const Home = ({ navigation }) => {
   return (
-    <Text>Home</Text>
-  )
-}
+    <View>
+      <Button title="Courses" onPress={() => navigation.navigate('Courses')}></Button>
+      <Button title="Batches" onPress={() => navigation.navigate('Batches')}></Button>
+    </View>
+  );
+};
 
-export default Home
+export default Home;
