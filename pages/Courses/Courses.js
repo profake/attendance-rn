@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
   TextInput,
   Pressable,
   FlatList,
@@ -11,7 +12,7 @@ import { Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v1 as uuidv1 } from "uuid";
 
-const Courses = () => {
+const Courses = ({ navigation }) => {
   const [courseData, setCourseData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, onChangeCourseName] = useState("");
@@ -35,6 +36,10 @@ const Courses = () => {
     } catch (e) {
       console.log(e.message);
     }
+  };
+
+  const handleCourseClick = (courseId, courseName) => {
+    navigation.navigate("CourseInfo", { courseId, courseName });
   };
 
   useEffect(() => {
@@ -102,14 +107,21 @@ const Courses = () => {
 
       {courseData ? (
         <FlatList
-          style={{width: "100%", height: "80%"}}
+          style={{ width: "100%", height: "80%" }}
           data={courseData}
           keyExtractor={(course) => course.id}
           renderItem={({ item }) => (
-            <View style={styles.courseContainer}>
+            <TouchableOpacity
+              style={styles.courseContainer}
+              onPress={() => {
+                handleCourseClick(item.id, item.courseName);
+              }}
+            >
               <Text style={styles.courseTextStyle}>{item.courseName}</Text>
-              <Text style={[styles.courseTextStyle, styles.smallText]}>{item.courseCode}</Text>
-            </View>
+              <Text style={[styles.courseTextStyle, styles.smallText]}>
+                {item.courseCode}
+              </Text>
+            </TouchableOpacity>
           )}
         ></FlatList>
       ) : (

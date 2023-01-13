@@ -36,8 +36,8 @@ const Batches = ({navigation}) => {
     }
   };
 
-  const showBatchInfo = (batchId, batchName) => {
-    navigation.navigate("BatchInfo", {batchId, batchName})
+  const showBatchInfo = (batchId) => {
+    navigation.navigate("BatchInfo", {batchId})
   }
 
   useEffect(() => {
@@ -103,7 +103,7 @@ const Batches = ({navigation}) => {
           data={batchData}
           keyExtractor={(course) => course.id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.courseContainer} onPress={() => showBatchInfo(item.id, item.batchName)}>
+            <TouchableOpacity style={styles.courseContainer} onPress={() => showBatchInfo(item.id)}>
               <Text style={styles.courseTextStyle}>{item.batchName}</Text>
             </TouchableOpacity>
           )}

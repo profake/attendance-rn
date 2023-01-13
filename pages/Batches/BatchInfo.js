@@ -12,10 +12,11 @@ import { React, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BatchInfo = ({ route, navigation }) => {
-  const [studentData, setStudentData] = useState([]);
+  const [batchName, setBatchName] = useState('');
+    const [studentData, setStudentData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [studentId, onChangeStudentId] = useState();
-  const { batchId, batchName } = route.params;
+  const { batchId } = route.params;
 
   const handleAddSingleStudent = async (studentId) => {
     try {
@@ -39,6 +40,7 @@ const BatchInfo = ({ route, navigation }) => {
       if (value !== null) {
         let batchInfo = JSON.parse(value);
         batchInfo = batchInfo.filter((item) => item.id === batchId);
+        setBatchName(batchInfo[0].batchName);
         setStudentData(batchInfo[0].students);
         console.log("Set follwing: " + batchInfo[0].students);
       } else {
