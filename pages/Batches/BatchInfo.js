@@ -12,20 +12,24 @@ import { React, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BatchInfo = ({ route, navigation }) => {
-  const [batchName, setBatchName] = useState('');
-    const [studentData, setStudentData] = useState([]);
+  const [studentData, setStudentData] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [studentId, onChangeStudentId] = useState();
-  const { batchId } = route.params;
+  const { batchId, batchName } = route.params;
 
   const handleAddSingleStudent = async (studentId) => {
     try {
-      const value = await AsyncStorage.getItem("Batches");
+      const value = await AsyncStorage.getItem("Courses");
       if (value !== null) {
-        let parsedValues = JSON.parse(value);
-        const index = parsedValues.findIndex((item) => item.id === batchId);
-        parsedValues[index].students.push(studentId);
-        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
+        const parsedValues = JSON.parse(value);
+        parsedValues.forEach(course => {
+          course.batches.forEach(batch => {
+            if (batch.id === batchId) {
+              batch.students.push(studentId);              
+            }
+          })
+        });
+        await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
       } else {
         console.log("Error: No batches found");
       }
@@ -35,14 +39,18 @@ const BatchInfo = ({ route, navigation }) => {
   };
 
   const getData = async () => {
+    console.log(batchName);
     try {
-      const value = await AsyncStorage.getItem("Batches");
+      const value = await AsyncStorage.getItem("Courses");
       if (value !== null) {
-        let batchInfo = JSON.parse(value);
-        batchInfo = batchInfo.filter((item) => item.id === batchId);
-        setBatchName(batchInfo[0].batchName);
-        setStudentData(batchInfo[0].students);
-        console.log("Set follwing: " + batchInfo[0].students);
+        const parsedValues = JSON.parse(value);
+        parsedValues.forEach(course => {
+          course.batches.forEach(batch => {
+            if (batch.id === batchId) {
+              setStudentData(batch.students);
+            }
+          })
+        });
       } else {
         console.log("Error: No batches found");
       }

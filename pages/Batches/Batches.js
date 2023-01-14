@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import DropDownPicker from "react-native-dropdown-picker";
 import {
   View,
   Text,
@@ -12,7 +13,11 @@ import { Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v1 as uuidv1 } from "uuid";
 
-const Batches = ({navigation}) => {
+const Batches = ({ navigation }) => {
+  const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
+  const [selectedCourseId, setselectedCourseId] = useState(null);
+  const [courses, setCourses] = useState([]);
+
   const [batchData, setBatchData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [batchName, onChangeBatchName] = useState("");
@@ -24,32 +29,50 @@ const Batches = ({navigation}) => {
       batchName,
       students: [],
     };
+    // console.log("BatchName: " + batchName + " Course: " + selectedCourseId);
     try {
-      let value = await AsyncStorage.getItem("Batches");
-      value = JSON.parse(value);
-      if (value) value.push(batch);
-      else value = [batch];
-      await AsyncStorage.setItem("Batches", JSON.stringify(value));
-      setBatchData(value);
+      const value = await AsyncStorage.getItem("Courses");
+      if (value !== null) {
+        const batchesArray = [];
+        let parsedValues = JSON.parse(value);
+        const index = parsedValues.findIndex(
+          (item) => item.id === selectedCourseId
+        ); // find course selected in dropdown
+        console.log(parsedValues[index]);
+        parsedValues[index].batches.push(batch);
+        await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
+        getData(); // not good, must change. change batchData here preferably
+      } else {
+        console.log("Error: No batches found");
+      }
     } catch (e) {
-      console.log(e.message);
+      console.error(e);
     }
   };
 
-  const showBatchInfo = (batchId) => {
-    navigation.navigate("BatchInfo", {batchId})
-  }
+  const showBatchInfo = (batchId, batchName) => {
+    navigation.navigate("BatchInfo", { batchId, batchName });
+  };
 
   useEffect(() => {
     getData();
   }, [batchData?.length]);
 
   const getData = async () => {
+    console.log('hell');
     try {
-      const value = await AsyncStorage.getItem("Batches");
+      const value = await AsyncStorage.getItem("Courses");
       if (value !== null) {
-        console.log("Set value: " + value);
-        setBatchData(JSON.parse(value));
+        //setCourses(JSON.parse(value));
+        const courseArray = [];
+        const batchesArray = [];
+        const parsed = JSON.parse(value);
+        parsed.forEach((item) => {
+          courseArray.push({ label: item.courseName, value: item.id });
+          item.batches.forEach((batch) =>  batchesArray.push(batch) );
+        });
+        setCourses(courseArray);
+        setBatchData(batchesArray);
       } else {
         console.log("value not found");
       }
@@ -71,6 +94,17 @@ const Batches = ({navigation}) => {
       >
         <View style={styles.modalView}>
           <Text style={styles.textHeader}>Add Batch</Text>
+          <DropDownPicker
+            style={styles.dropDown}
+            placeholder="Select a Course"
+            zIndex={3000}
+            open={courseDropdownOpen}
+            value={selectedCourseId}
+            items={courses}
+            setOpen={setCourseDropdownOpen}
+            setValue={setselectedCourseId}
+            setItems={setCourses}
+          />
           <TextInput
             style={styles.textInput}
             onChangeText={onChangeBatchName}
@@ -103,7 +137,10 @@ const Batches = ({navigation}) => {
           data={batchData}
           keyExtractor={(course) => course.id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.courseContainer} onPress={() => showBatchInfo(item.id)}>
+            <TouchableOpacity
+              style={styles.courseContainer}
+              onPress={() => showBatchInfo(item.id, item.batchName)}
+            >
               <Text style={styles.courseTextStyle}>{item.batchName}</Text>
             </TouchableOpacity>
           )}
@@ -124,6 +161,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
     paddingTop: 20,
+  },
+  dropDown: {
+    marginTop: 10,
   },
   courseContainer: {
     flexDirection: "column",
