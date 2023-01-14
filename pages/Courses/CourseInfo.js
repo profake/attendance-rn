@@ -15,14 +15,54 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const CourseInfo = ({ route, navigation }) => {
   const [batchesTakingCourse, setBatchesTakingCourse] = useState([]);
   const { courseId, courseName } = route.params;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [allBatches, setAllBatches] = useState();
+  const [selectedBatches, setSelectedBatches] = useState([]);
 
-  const handleBatchPress = (batchId, batchName) => {
+  const handleBatchPress = (batchId) => {
     console.log(batchId);
-    navigation.navigate("BatchInfo", {batchId, batchName});
+    navigation.navigate("BatchInfo", { batchId });
+  };
+
+  const handleAddSelectedBatchesToCourse = async (courseIds) => {
+    try {
+      const value = await AsyncStorage.getItem("Courses");
+      if (value !== null) {
+        let parsedValues = JSON.parse(value);
+        const index = parsedValues.findIndex((item) => item.id === courseId);
+        parsedValues[index].batches = courseIds;
+        await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
+        setBatchesTakingCourse(courseIds);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleBatchSelection = (courseId) => {
+    console.log(courseId);
+    if (selectedBatches.includes(courseId)) {
+      setSelectedBatches(selectedBatches.filter((batch) => batch !== courseId));
+    } else {
+      setSelectedBatches([...selectedBatches, courseId]);
+    }
   };
 
   const handleAddBatchesToCourse = async () => {
-    navigation.navigate("Batches");
+    try {
+      const value = await AsyncStorage.getItem("Batches");
+      if (value !== null) {
+        let parsedValues = JSON.parse(value);
+        console.log(parsedValues);
+        setAllBatches(parsedValues);
+        setModalVisible(true);
+        // await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
+      } else {
+        console.log("Error: No batches found");
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const getData = async () => {
@@ -31,7 +71,20 @@ const CourseInfo = ({ route, navigation }) => {
       if (value !== null) {
         let courseInfo = JSON.parse(value);
         courseInfo = courseInfo.filter((item) => item.id === courseId);
-        setBatchesTakingCourse(courseInfo[0].batches);
+        const batchesArray = [];
+        let parsedBatches = await AsyncStorage.getItem("Batches");
+        parsedBatches = JSON.parse(parsedBatches);
+        courseInfo[0]?.batches.forEach((item) => {
+          try {
+            const index = parsedBatches.findIndex((batch) => batch.id === item);
+            if (index !== -1) {
+              batchesArray.push(parsedBatches[index].batchName);
+            }
+          } catch (e) {}
+          setBatchesTakingCourse(batchesArray);
+        });
+
+        console.log("Filtered courseinfo: " + courseInfo[0].batches);
       } else {
         console.log("Error: No batches found");
       }
@@ -42,27 +95,81 @@ const CourseInfo = ({ route, navigation }) => {
 
   useEffect(() => {
     getData();
-  }, [batchesTakingCourse?.length]);
+  }, []);
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.textHeader}>
+            {batchesTakingCourse.length !== 0
+              ? "Update Batches"
+              : "Add Batches"}
+          </Text>
+          <View style={styles.buttonContainer}>
+            <FlatList
+              numColumns={2}
+              style={styles.batchesList}
+              data={allBatches}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => handleBatchSelection(item.id)}
+                  style={
+                    selectedBatches.includes(item.id)
+                      ? [styles.button, styles.buttonClose, styles.selected]
+                      : [styles.button, styles.buttonClose]
+                  }
+                >
+                  <Text style={styles.textStyle}>{item.batchName}</Text>
+                </Pressable>
+              )}
+            ></FlatList>
+            <Pressable
+              style={[styles.button]}
+              onPress={() => {
+                setModalVisible(false);
+                handleAddSelectedBatchesToCourse(selectedBatches);
+              }}
+            >
+              <Text style={styles.textStyle}>Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
       <Text style={styles.textHeader}>{courseName}</Text>
       {batchesTakingCourse && batchesTakingCourse?.length !== 0 ? (
         <FlatList
           style={{ width: "100%", height: "80%" }}
           data={batchesTakingCourse}
-          keyExtractor={(batch) => batch.id}
+          keyExtractor={(batch) => batch}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleBatchPress(item.id, item.batchName)} style={styles.courseContainer}>
-              <Text style={styles.courseTextStyle}>{item.batchName}</Text>
+            <TouchableOpacity
+              onPress={() => handleBatchPress(item)}
+              style={styles.courseContainer}
+            >
+              <Text style={styles.courseTextStyle}>{item}</Text>
             </TouchableOpacity>
           )}
         ></FlatList>
       ) : (
         <Text style={styles.text}>No batches found under this course.</Text>
       )}
-      <Pressable style={styles.button} onPress={() => handleAddBatchesToCourse()}>
-        <Text style={styles.textStyle}>{batchesTakingCourse.length !== 0 ? "Update Batches" : "Add Batches"}</Text>
+      <Pressable
+        style={styles.button}
+        onPress={() => handleAddBatchesToCourse()}
+      >
+        <Text style={styles.textStyle}>
+          {batchesTakingCourse.length !== 0 ? "Update Batches" : "Add Batches"}
+        </Text>
       </Pressable>
     </View>
   );

@@ -13,23 +13,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BatchInfo = ({ route, navigation }) => {
   const [studentData, setStudentData] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [studentYearSession, onChangeYearSession] = useState("");
+  const [studentIdRangeStart, onChangeStudentIdRangeStart] = useState("");
+  const [studentIdRangeEnd, onChangeStudentIdRangeEnd] = useState("");
+  const [singleStudentModalVisible, setSingleStudentModalVisible] =
+    useState(false);
+  const [multipleStudentModalVisible, setMultipleStudentModalVisible] =
+    useState(false);
   const [studentId, onChangeStudentId] = useState();
   const { batchId, batchName } = route.params;
 
   const handleAddSingleStudent = async (studentId) => {
     try {
-      const value = await AsyncStorage.getItem("Courses");
+      const value = await AsyncStorage.getItem("Batches");
       if (value !== null) {
-        const parsedValues = JSON.parse(value);
-        parsedValues.forEach(course => {
-          course.batches.forEach(batch => {
-            if (batch.id === batchId) {
-              batch.students.push(studentId);              
-            }
-          })
-        });
-        await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
+        let parsedValues = JSON.parse(value);
+        const index = parsedValues.findIndex((item) => item.id === batchId);
+        parsedValues[index].students.push(studentId);
+        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
+        getData();
       } else {
         console.log("Error: No batches found");
       }
@@ -38,19 +40,36 @@ const BatchInfo = ({ route, navigation }) => {
     }
   };
 
-  const getData = async () => {
-    console.log(batchName);
+  const handleAddMultipleStudents = async () => {
+    const studentsToAdd = [];
+    for (let i = studentIdRangeStart; i <= studentIdRangeEnd; i++) {
+      const id = studentYearSession + "-" + i;
+      studentsToAdd.push(id);
+    }
     try {
-      const value = await AsyncStorage.getItem("Courses");
+      const value = await AsyncStorage.getItem("Batches");
       if (value !== null) {
-        const parsedValues = JSON.parse(value);
-        parsedValues.forEach(course => {
-          course.batches.forEach(batch => {
-            if (batch.id === batchId) {
-              setStudentData(batch.students);
-            }
-          })
+        let parsedValues = JSON.parse(value);
+        const index = parsedValues.findIndex((item) => item.id === batchId);
+        studentsToAdd.forEach((student) => {
+          parsedValues[index].students.push(student);
         });
+        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
+        getData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("Batches");
+      if (value !== null) {
+        let batchInfo = JSON.parse(value);
+        batchInfo = batchInfo.filter((item) => item.id === batchId);
+        setStudentData(batchInfo[0]?.students);
+        // console.log("Set follwing: " + batchInfo[0].students);
       } else {
         console.log("Error: No batches found");
       }
@@ -68,10 +87,10 @@ const BatchInfo = ({ route, navigation }) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
+        visible={singleStudentModalVisible}
         onRequestClose={() => {
           Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
+          setSingleStudentModalVisible(!singleStudentModalVisible);
         }}
       >
         <View style={styles.modalView}>
@@ -85,15 +104,84 @@ const BatchInfo = ({ route, navigation }) => {
           <View style={styles.buttonContainer}>
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={() =>
+                setSingleStudentModalVisible(!singleStudentModalVisible)
+              }
             >
               <Text style={styles.textStyle}>Cancel</Text>
             </Pressable>
             <Pressable
               style={[styles.button]}
               onPress={() => {
-                setModalVisible(!modalVisible);
+                setSingleStudentModalVisible(!singleStudentModalVisible);
                 handleAddSingleStudent(studentId);
+              }}
+            >
+              <Text style={styles.textStyle}>Add Entry</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={multipleStudentModalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setMultipleStudentModalVisible(!multipleStudentModalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.textHeader}>Add Students</Text>
+          <Text style={styles.text}>Year, session and department</Text>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={onChangeYearSession}
+            value={studentYearSession}
+            placeholder="e.g: 191-115"
+          />
+          <Text style={styles.text}>Range Start</Text>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={onChangeStudentIdRangeStart}
+            value={studentIdRangeStart}
+            placeholder="e.g: 101"
+          />
+          <Text style={styles.text}>Range End</Text>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={onChangeStudentIdRangeEnd}
+            value={studentIdRangeEnd}
+            placeholder="e.g: 140"
+          />
+          {studentYearSession !== "" &&
+            studentIdRangeStart !== "" &&
+            studentIdRangeEnd !== "" && (
+              <View style={{ justifyContent: "center" }}>
+                <Text style={styles.text}>
+                  The following IDs will be added:
+                </Text>
+                <Text style={styles.textHeader}>
+                  {studentYearSession}-{studentIdRangeStart} to{" "}
+                  {studentYearSession}-{studentIdRangeEnd}
+                </Text>
+              </View>
+            )}
+          <View style={styles.buttonContainer}>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() =>
+                setMultipleStudentModalVisible(!multipleStudentModalVisible)
+              }
+            >
+              <Text style={styles.textStyle}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button]}
+              onPress={() => {
+                setMultipleStudentModalVisible(!multipleStudentModalVisible);
+                handleAddMultipleStudents();
               }}
             >
               <Text style={styles.textStyle}>Add Entry</Text>
@@ -117,9 +205,22 @@ const BatchInfo = ({ route, navigation }) => {
       ) : (
         <Text style={styles.text}>No students found under this batch.</Text>
       )}
-      <Pressable style={styles.button} onPress={() => setModalVisible(true)}>
-        <Text style={styles.textStyle}>Add Students</Text>
-      </Pressable>
+      <View
+        style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
+      >
+        <Pressable
+          style={styles.button}
+          onPress={() => setSingleStudentModalVisible(true)}
+        >
+          <Text style={styles.textStyle}>Add Students</Text>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => setMultipleStudentModalVisible(true)}
+        >
+          <Text style={styles.textStyle}>Add Multiple Students</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

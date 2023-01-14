@@ -4,7 +4,7 @@ import React from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Attendance = ({navigation}) => {
+const Attendance = ({ navigation }) => {
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -12,25 +12,33 @@ const Attendance = ({navigation}) => {
   const [batchDropdownOpen, setBatchDropdownOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [batches, setBatches] = useState([]);
-  
+
   const handleAddAttendance = (selectedCourse, selectedBatch) => {
-    console.log(selectedBatch);
-    navigation.navigate("AttendanceAdd", {selectedCourse, selectedBatch});
-  }
+    // console.log(selectedBatch);
+    navigation.navigate("AttendanceAdd", { selectedCourse, selectedBatch });
+  };
 
   const onCourseSelectionChange = async (courseId) => {
-    console.log(courseId);
+    //console.log(courseId);
     try {
       const value = await AsyncStorage.getItem("Courses");
       if (value !== null) {
         const batchesArray = [];
-        let parsed = JSON.parse(value);
-        parsed = parsed.filter((item) => item.id === courseId);
-        parsed.filter((item) => item.id === courseId);
-        console.log(parsed[0]);
-        parsed[0]?.batches.forEach((batch) =>
-          batchesArray.push({ label: batch.batchName, value: batch.id})
-        );
+        let parsedCourses = JSON.parse(value);
+        const index = parsedCourses.findIndex((item) => item.id === courseId);
+        let parsedBatches = await AsyncStorage.getItem("Batches");
+        parsedBatches = JSON.parse(parsedBatches);
+        parsedCourses[index]?.batches.forEach((item) => {
+          console.log(item);
+          try {
+            const iindex = parsedBatches.findIndex((batch) => batch.id === item);
+            if (iindex !== -1) {
+              batchesArray.push({ label: parsedBatches[iindex].batchName, value: parsedBatches[iindex].id });
+            }
+            setBatchData(value);
+          } catch (e) {}
+        });
+
         setBatches(batchesArray);
       }
     } catch (error) {
@@ -50,7 +58,7 @@ const Attendance = ({navigation}) => {
             courseArray.push({ label: item.courseName, value: item.id });
           });
           setCourses(courseArray);
-          console.log(courseArray);
+          // console.log(courseArray);
         } else {
           console.log("value not found");
         }
@@ -100,7 +108,10 @@ const Attendance = ({navigation}) => {
           }}
         />
         <Text>Attendance overview will be shown here</Text>
-        <Pressable style={styles.button} onPress={()=> handleAddAttendance(selectedCourse, selectedBatch)}>
+        <Pressable
+          style={styles.button}
+          onPress={() => handleAddAttendance(selectedCourse, selectedBatch)}
+        >
           <Text style={styles.textStyle}>Add Attendance</Text>
         </Pressable>
       </View>
@@ -213,6 +224,4 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
   },
-  
-  
 });

@@ -82,26 +82,35 @@ const AttendanceAdd = ({ route }) => {
         const index = courseInfo.findIndex((item) => item.id === courseId);
         setIndexOfCourse(index);
         setCourseName(courseInfo[index].courseName);
-        courseInfo[index].batches.forEach((batch) => {
-          if (batch.id === batchId) {
-            setBatchName(batch.batchName);
-            setStudents(batch.students);
-          }
-        });
       } else {
         console.log("Error: No batches found");
       }
     } catch (e) {
       console.error(e);
     }
+    try {
+      let value = await AsyncStorage.getItem("Batches");
+      value = JSON.parse(value);
+      const index = value.findIndex((item) => item.id === batchId);
+      if (index !== -1) {
+        setBatchName(value[index].batchName);
+        setStudents(value[index].students);
+      }
+      setBatchData(value);
+    } catch (e) {}
   };
 
-  const getAttendance = async(date) => {
+  const getAttendance = async (date) => {
     try {
       const value = await AsyncStorage.getItem("Attendance");
       if (value !== null) {
         let attendance = JSON.parse(value);
-        const index = attendance.findIndex((item) => item.date === date && item.courseId === courseId && item.batchId === batchId);
+        const index = attendance.findIndex(
+          (item) =>
+            item.date === date &&
+            item.courseId === courseId &&
+            item.batchId === batchId
+        );
         if (index !== -1) {
           console.log("Got attendance for date: " + attendance[index].date);
           setSelectedStudents(attendance[index].students);
@@ -113,7 +122,7 @@ const AttendanceAdd = ({ route }) => {
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   useEffect(() => {
     getData();
