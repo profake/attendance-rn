@@ -58,8 +58,8 @@ const AttendanceAdd = ({ route }) => {
 
   const handleStudentOnclick = (studentId) => {
     console.log(studentId);
-    var array = [...selectedStudents]; // make a separate copy of the array
-    var index = array.indexOf(studentId);
+    let array = [...selectedStudents]; // make a separate copy of the array
+    const index = array.indexOf(studentId);
     if (index !== -1) {
       array.splice(index, 1);
     } else {

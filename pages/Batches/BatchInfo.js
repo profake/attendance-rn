@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { React, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Dialog from "react-native-dialog";
 
 const BatchInfo = ({ route, navigation }) => {
   const [studentData, setStudentData] = useState([]);
@@ -20,7 +21,10 @@ const BatchInfo = ({ route, navigation }) => {
     useState(false);
   const [multipleStudentModalVisible, setMultipleStudentModalVisible] =
     useState(false);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [studentId, onChangeStudentId] = useState();
+  const [studentIdToDelete, setStudentIdToDelete] = useState();
+
   const { batchId, batchName } = route.params;
 
   const handleAddSingleStudent = async (studentId) => {
@@ -62,6 +66,30 @@ const BatchInfo = ({ route, navigation }) => {
     }
   };
 
+  const handleLongPress = (studentId) => {
+    console.log(studentId);
+    setStudentIdToDelete(studentId);
+    setDeleteDialogVisible(true);
+  };
+
+  const handleStudentDelete = async () => {
+    let array = [...studentData]; // make a separate copy of the array
+    const index = array.indexOf(studentIdToDelete);
+    array.splice(index, 1);
+    const value = await AsyncStorage.getItem("Batches");
+    if (value !== null) {
+      let parsedValues = JSON.parse(value);
+      const iindex = parsedValues.findIndex((item) => item.id === batchId);
+      parsedValues[iindex].students = array;
+      await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
+      setStudentData(array);
+      getData();
+    }
+
+    setStudentIdToDelete("");
+    setDeleteDialogVisible(false);
+  };
+
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem("Batches");
@@ -84,6 +112,20 @@ const BatchInfo = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View>
+        <Dialog.Container visible={deleteDialogVisible}>
+          <Dialog.Title>Delete ID</Dialog.Title>
+          <Dialog.Description>
+            Do you want to delete this ID? You cannot undo this action.
+          </Dialog.Description>
+          <Dialog.Button
+            label="Cancel"
+            onPress={() => setDeleteDialogVisible(false)}
+          />
+          <Dialog.Button label="Delete" onPress={handleStudentDelete} />
+        </Dialog.Container>
+      </View>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -197,7 +239,10 @@ const BatchInfo = ({ route, navigation }) => {
           data={studentData}
           keyExtractor={(student) => student}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.courseContainer}>
+            <TouchableOpacity
+              style={styles.courseContainer}
+              onLongPress={() => handleLongPress(item)}
+            >
               <Text style={styles.courseTextStyle}>{item}</Text>
             </TouchableOpacity>
           )}
@@ -212,7 +257,7 @@ const BatchInfo = ({ route, navigation }) => {
           style={styles.button}
           onPress={() => setSingleStudentModalVisible(true)}
         >
-          <Text style={styles.textStyle}>Add Students</Text>
+          <Text style={styles.textStyle}>Add Student</Text>
         </Pressable>
         <Pressable
           style={styles.button}
