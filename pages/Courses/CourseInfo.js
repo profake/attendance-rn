@@ -19,9 +19,9 @@ const CourseInfo = ({ route, navigation }) => {
   const [allBatches, setAllBatches] = useState();
   const [selectedBatches, setSelectedBatches] = useState([]);
 
-  const handleBatchPress = (batchId) => {
-    console.log(batchId);
-    navigation.navigate("BatchInfo", { batchId });
+  const handleBatchPress = (batchId, batchName) => {
+    // console.log(batchId);
+    navigation.navigate("BatchInfo", { batchId, batchName });
   };
 
   const handleAddSelectedBatchesToCourse = async (courseIds) => {
@@ -32,7 +32,7 @@ const CourseInfo = ({ route, navigation }) => {
         const index = parsedValues.findIndex((item) => item.id === courseId);
         parsedValues[index].batches = courseIds;
         await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
-        setBatchesTakingCourse(courseIds);
+        getData();
       }
     } catch (e) {
       console.error(e);
@@ -72,6 +72,7 @@ const CourseInfo = ({ route, navigation }) => {
         let courseInfo = JSON.parse(value);
         courseInfo = courseInfo.filter((item) => item.id === courseId);
         const batchesArray = [];
+        const selectedBatchesArray = [];
         let parsedBatches = await AsyncStorage.getItem("Batches");
         parsedBatches = JSON.parse(parsedBatches);
         courseInfo[0]?.batches.forEach((item) => {
@@ -79,9 +80,11 @@ const CourseInfo = ({ route, navigation }) => {
             const index = parsedBatches.findIndex((batch) => batch.id === item);
             if (index !== -1) {
               batchesArray.push(parsedBatches[index].batchName);
+              selectedBatchesArray.push(parsedBatches[index].id);
             }
           } catch (e) {}
           setBatchesTakingCourse(batchesArray);
+          setSelectedBatches(selectedBatchesArray);
         });
 
         console.log("Filtered courseinfo: " + courseInfo[0].batches);
