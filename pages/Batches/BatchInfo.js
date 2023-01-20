@@ -47,7 +47,14 @@ const BatchInfo = ({ route, navigation }) => {
   const handleAddMultipleStudents = async () => {
     const studentsToAdd = [];
     for (let i = studentIdRangeStart; i <= studentIdRangeEnd; i++) {
-      const id = studentYearSession + "-" + i;
+      let lastDigit = "0";
+      if (i < 100 && i!= studentIdRangeStart) {
+        if (i < 10) {
+          lastDigit = lastDigit + "0" + i;
+        }
+        else lastDigit = lastDigit + i;
+      } else lastDigit = i;
+      const id = studentYearSession + "-" + lastDigit;
       studentsToAdd.push(id);
     }
     try {
