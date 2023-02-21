@@ -8,6 +8,8 @@ import BatchInfo from './pages/Batches/BatchInfo';
 import CourseInfo from './pages/Courses/CourseInfo';
 import Attendance from './pages/Attendance/Attendance';
 import AttendanceAdd from './pages/Attendance/AttendanceAdd';
+import Export from './pages/Export/Export';
+
 export default function App() {
   const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,7 @@ export default function App() {
         <Stack.Screen name="CourseInfo" component={CourseInfo} />
         <Stack.Screen name="Attendance" component={Attendance} />
         <Stack.Screen name="AttendanceAdd" component={AttendanceAdd} />
+        <Stack.Screen name="Export" component={Export} />
       </Stack.Navigator>
     </NavigationContainer>
   );

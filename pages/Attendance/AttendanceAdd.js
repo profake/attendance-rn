@@ -38,7 +38,7 @@ const AttendanceAdd = ({ route }) => {
       batchId,
       students: selectedStudents,
     };
-    // console.log("Saving following: " + date + courseId + batchId + attendance.students);
+    console.log("Saving following: " + date + courseId + batchId + attendance.students);
     let value = await AsyncStorage.getItem("Attendance");
     value = JSON.parse(value);
     if (value) {
