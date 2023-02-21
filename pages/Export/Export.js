@@ -13,8 +13,10 @@ import moment from "moment";
 const Export = () => {
   let studentList = [];
   let attendanceInfo = [];
+  const studentIdMap = new Map();
+  let exportFileName = "fileName";
 
-  const addStudentIdsFromBatch = async(worksheet) => {
+  const addStudentIdsToSheet = async(worksheet) => {
     try {
       const value = await AsyncStorage.getItem("Batches");
       if (value !== null) {
@@ -28,13 +30,15 @@ const Export = () => {
       console.error(e);
     }
   
-    for (let i = 2; i <= studentList.length;i++) {
-      let orig = 'A' + i;
-      XLSX.utils.sheet_add_aoa(worksheet, [[studentList[i]]], {origin: orig});
+    for (let i = 2; i < studentList.length + 2;i++) {
+      let orig = 'A' + i; // Starts from A2
+      XLSX.utils.sheet_add_aoa(worksheet, [[studentList[i-2]]], {origin: orig});
+      studentIdMap.set(studentList[i-2], orig);
+      // console.log(studentIdMap.get(studentList[i-2]), studentList[i-2]);
     }
   }
 
-  const addDatesFromAttendance = async (worksheet) => {
+  const addAttendanceDataToSheet = async (worksheet) => {
     let value = await AsyncStorage.getItem("Attendance");
     value = JSON.parse(value);
     for (let i = 0; i < value.length; i++) {
@@ -52,19 +56,17 @@ const Export = () => {
     attendanceInfo.forEach(element => {
       let orig = String.fromCharCode(i) + '1'; // B1, C1, D1...
       XLSX.utils.sheet_add_aoa(worksheet, [[element.date]], {origin: orig});
+      orig = orig.slice(0,-1);
       element.students.forEach(student => {
-        // loop through entire student column and find the row where we can add P
-        // this can be improved by mapping the info beforehand; I might do that later
-        for (let j = 2; j < studentList.length;j++) {
-          let origStudentCell = 'A' + j; // A2, A3, A4...
-          let cellValue = worksheet[origStudentCell].v; // 191-115-001
-          console.log(worksheet[origStudentCell].v);
-          if (cellValue === student) {
-              orig = orig.slice(0,-1);
-              orig = orig + j; // B3, C7 etc...
-              XLSX.utils.sheet_add_aoa(worksheet, [['P']], {origin: orig});
-          }
-        }
+        // console.log(student);
+        let cellToAddTo = studentIdMap.get(student);
+        console.log(student + ": " + cellToAddTo);
+        cellToAddTo = cellToAddTo.slice(1);
+        console.log(cellToAddTo);
+        console.log(orig);
+        cellToAddTo = orig + cellToAddTo;
+        console.log(cellToAddTo);
+        XLSX.utils.sheet_add_aoa(worksheet, [['P']], {origin: cellToAddTo});
       });
       i++;
     });
@@ -96,8 +98,8 @@ const Export = () => {
     // Student IDs serially on the first column
     let worksheet = XLSX.utils.aoa_to_sheet([['ID']], {origin: 'A1'});
     
-    await addStudentIdsFromBatch(worksheet);
-    await addDatesFromAttendance(worksheet);
+    await addStudentIdsToSheet(worksheet);
+    await addAttendanceDataToSheet(worksheet);
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
 
@@ -109,7 +111,7 @@ const Export = () => {
     try {
       await StorageAccessFramework.createFileAsync(
         permissions.directoryUri,
-        "fileName",
+        exportFileName,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       )
         .then(async (uri) => {
