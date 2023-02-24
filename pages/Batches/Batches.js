@@ -9,31 +9,20 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Modal } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v1 as uuidv1 } from "uuid";
+import { addNewBatch, getAllBatches } from "../../model/batch";
 
 const Batches = ({navigation}) => {
   const [batchData, setBatchData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [batchName, onChangeBatchName] = useState("");
+  
+  const getData = async () => {
+    const data = await getAllBatches();
+    setBatchData(data);
+  };
 
   const handleAddEntry = async (batchName) => {
-    let id = uuidv1();
-    let batch = {
-      id,
-      batchName,
-      students: [],
-    };
-    try {
-      let value = await AsyncStorage.getItem("Batches");
-      value = JSON.parse(value);
-      if (value) value.push(batch);
-      else value = [batch];
-      await AsyncStorage.setItem("Batches", JSON.stringify(value));
-      setBatchData(value);
-    } catch (e) {
-      console.log(e.message);
-    }
+    setBatchData(addNewBatch(batchName));
   };
 
   const showBatchInfo = (batchId, batchName) => {
@@ -43,20 +32,6 @@ const Batches = ({navigation}) => {
   useEffect(() => {
     getData();
   }, [batchData?.length]);
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Batches");
-      if (value !== null) {
-        console.log("Set value: " + value);
-        setBatchData(JSON.parse(value));
-      } else {
-        console.log("value not found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   return (
     <View style={styles.container}>

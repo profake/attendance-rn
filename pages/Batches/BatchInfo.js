@@ -9,8 +9,8 @@ import {
   TextInput,
 } from "react-native";
 import { React, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Dialog from "react-native-dialog";
+import { addMultipleStudents, addSingleStudent, deleteStudent, getAllBatches } from "../../model/batch";
 
 const BatchInfo = ({ route, navigation }) => {
   const [studentData, setStudentData] = useState([]);
@@ -27,50 +27,20 @@ const BatchInfo = ({ route, navigation }) => {
 
   const { batchId, batchName } = route.params;
 
-  const handleAddSingleStudent = async (studentId) => {
-    try {
-      const value = await AsyncStorage.getItem("Batches");
-      if (value !== null) {
-        let parsedValues = JSON.parse(value);
-        const index = parsedValues.findIndex((item) => item.id === batchId);
-        parsedValues[index].students.push(studentId);
-        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
-        getData();
-      } else {
-        console.log("Error: No batches found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const getData = async () => {
+    let data = await getAllBatches();
+    data = data.filter((item) => item.id === batchId);
+    setStudentData(data[0]?.students);
   };
 
-  const handleAddMultipleStudents = async () => {
-    const studentsToAdd = [];
-    for (let i = studentIdRangeStart; i <= studentIdRangeEnd; i++) {
-      let lastDigit = "0";
-      if (i < 100 && i!= studentIdRangeStart) {
-        if (i < 10) {
-          lastDigit = lastDigit + "0" + i;
-        }
-        else lastDigit = lastDigit + i;
-      } else lastDigit = i;
-      const id = studentYearSession + "-" + lastDigit;
-      studentsToAdd.push(id);
-    }
-    try {
-      const value = await AsyncStorage.getItem("Batches");
-      if (value !== null) {
-        let parsedValues = JSON.parse(value);
-        const index = parsedValues.findIndex((item) => item.id === batchId);
-        studentsToAdd.forEach((student) => {
-          parsedValues[index].students.push(student);
-        });
-        await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
-        getData();
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const handleAddSingleStudent = async (studentId) => {
+    addSingleStudent(studentId, batchId);
+    setStudentData(null); // very bad solution but it works for now
+  };
+
+  const handleAddMultipleStudents = async (studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId) => {
+    addMultipleStudents(studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId);
+    setStudentData(null); // very bad solution but it works for now
   };
 
   const handleLongPress = (studentId) => {
@@ -80,37 +50,9 @@ const BatchInfo = ({ route, navigation }) => {
   };
 
   const handleStudentDelete = async () => {
-    let array = [...studentData]; // make a separate copy of the array
-    const index = array.indexOf(studentIdToDelete);
-    array.splice(index, 1);
-    const value = await AsyncStorage.getItem("Batches");
-    if (value !== null) {
-      let parsedValues = JSON.parse(value);
-      const iindex = parsedValues.findIndex((item) => item.id === batchId);
-      parsedValues[iindex].students = array;
-      await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
-      setStudentData(array);
-      getData();
-    }
-
+    setStudentData(deleteStudent(studentData, studentIdToDelete, batchId));
     setStudentIdToDelete("");
     setDeleteDialogVisible(false);
-  };
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Batches");
-      if (value !== null) {
-        let batchInfo = JSON.parse(value);
-        batchInfo = batchInfo.filter((item) => item.id === batchId);
-        setStudentData(batchInfo[0]?.students);
-        // console.log("Set follwing: " + batchInfo[0].students);
-      } else {
-        console.log("Error: No batches found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
   };
 
   useEffect(() => {
@@ -230,7 +172,7 @@ const BatchInfo = ({ route, navigation }) => {
               style={[styles.button]}
               onPress={() => {
                 setMultipleStudentModalVisible(!multipleStudentModalVisible);
-                handleAddMultipleStudents();
+                handleAddMultipleStudents(studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId);
               }}
             >
               <Text style={styles.textStyle}>Add Entry</Text>

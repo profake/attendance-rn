@@ -9,8 +9,7 @@ import {
   FlatList,
 } from "react-native";
 import { Modal } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v1 as uuidv1 } from "uuid";
+import { addCourse, getAllCourses } from "../../model/course";
 
 const Courses = ({ navigation }) => {
   const [courseData, setCourseData] = useState(null);
@@ -19,23 +18,7 @@ const Courses = ({ navigation }) => {
   const [courseCode, onChangeCourseCode] = useState("");
 
   const handleAddEntry = async (courseCode, courseName) => {
-    let id = uuidv1();
-    let course = {
-      id,
-      courseName,
-      courseCode,
-      batches: [],
-    };
-    try {
-      let value = await AsyncStorage.getItem("Courses");
-      value = JSON.parse(value);
-      if (value) value.push(course);
-      else value = [course];
-      await AsyncStorage.setItem("Courses", JSON.stringify(value));
-      setCourseData(value);
-    } catch (e) {
-      console.log(e.message);
-    }
+    setCourseData(addCourse(courseCode, courseName));
   };
 
   const handleCourseClick = (courseId, courseName) => {
@@ -47,17 +30,8 @@ const Courses = ({ navigation }) => {
   }, [courseData?.length]);
 
   const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Courses");
-      if (value !== null) {
-        console.log("Set value: " + value);
-        setCourseData(JSON.parse(value));
-      } else {
-        console.log("value not found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    const data = await getAllCourses();
+    setCourseData(data);
   };
 
   return (

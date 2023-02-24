@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "react-native";
 import { React, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { addBatchesToCourse, addSelectedBatchesToCourse, getDetailedCourseData } from "../../model/course";
 
 const CourseInfo = ({ route, navigation }) => {
   const [batchesTakingCourse, setBatchesTakingCourse] = useState([]);
@@ -24,19 +24,8 @@ const CourseInfo = ({ route, navigation }) => {
     navigation.navigate("BatchInfo", { batchId, batchName });
   };
 
-  const handleAddSelectedBatchesToCourse = async (courseIds) => {
-    try {
-      const value = await AsyncStorage.getItem("Courses");
-      if (value !== null) {
-        let parsedValues = JSON.parse(value);
-        const index = parsedValues.findIndex((item) => item.id === courseId);
-        parsedValues[index].batches = courseIds;
-        await AsyncStorage.setItem("Courses", JSON.stringify(parsedValues));
-        getData();
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const handleAddSelectedBatchesToCourse = async (batchIds) => {
+    addSelectedBatchesToCourse(courseId, batchIds);
   };
 
   const handleBatchSelection = (courseId) => {
@@ -49,56 +38,20 @@ const CourseInfo = ({ route, navigation }) => {
   };
 
   const handleAddBatchesToCourse = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Batches");
-      if (value !== null) {
-        let parsedValues = JSON.parse(value);
-        console.log(parsedValues);
-        setAllBatches(parsedValues);
-        setModalVisible(true);
-        // await AsyncStorage.setItem("Batches", JSON.stringify(parsedValues));
-      } else {
-        console.log("Error: No batches found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    const data = await addBatchesToCourse();
+    setAllBatches(data);
+    setModalVisible(true);
   };
 
   const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Courses");
-      if (value !== null) {
-        let courseInfo = JSON.parse(value);
-        courseInfo = courseInfo.filter((item) => item.id === courseId);
-        const batchesArray = [];
-        const selectedBatchesArray = [];
-        let parsedBatches = await AsyncStorage.getItem("Batches");
-        parsedBatches = JSON.parse(parsedBatches);
-        courseInfo[0]?.batches.forEach((item) => {
-          try {
-            const index = parsedBatches.findIndex((batch) => batch.id === item);
-            if (index !== -1) {
-              batchesArray.push(parsedBatches[index].batchName);
-              selectedBatchesArray.push(parsedBatches[index].id);
-            }
-          } catch (e) {}
-          setBatchesTakingCourse(batchesArray);
-          setSelectedBatches(selectedBatchesArray);
-        });
-
-        console.log("Filtered courseinfo: " + courseInfo[0].batches);
-      } else {
-        console.log("Error: No batches found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    const data = await getDetailedCourseData(courseId);
+    setBatchesTakingCourse(data.batchesArray);
+    setSelectedBatches(data.selectedBatchesArray);
   };
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [batchesTakingCourse?.length]);
 
   return (
     <View style={styles.container}>
