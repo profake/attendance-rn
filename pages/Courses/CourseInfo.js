@@ -106,13 +106,13 @@ const CourseInfo = ({ route, navigation }) => {
         <FlatList
           style={{ width: "100%", height: "80%" }}
           data={batchesTakingCourse}
-          keyExtractor={(batch) => batch}
+          keyExtractor={(item) => item[0]}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleBatchPress(item)}
+              onPress={() => handleBatchPress(item[0], item[1])}
               style={styles.courseContainer}
             >
-              <Text style={styles.courseTextStyle}>{item}</Text>
+              <Text style={styles.courseTextStyle}>{item[1]}</Text>
             </TouchableOpacity>
           )}
         ></FlatList>

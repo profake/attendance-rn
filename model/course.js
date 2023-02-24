@@ -33,10 +33,10 @@ export const getDetailedCourseData = async (courseId) => {
         try {
           const index = parsedBatches.findIndex((batch) => batch.id === item);
           if (index !== -1) {
-            data.batchesArray.push(parsedBatches[index].batchName);
+            data.batchesArray.push([parsedBatches[index].id, parsedBatches[index].batchName]);
             data.selectedBatchesArray.push(parsedBatches[index].id);
-            console.log("Pushing batch " + parsedBatches[index].batchName);
-            console.log("Pushing id " + parsedBatches[index].id);
+            // console.log("Pushing batch " + parsedBatches[index].batchName);
+            // console.log("Pushing id " + parsedBatches[index].id);
           }
         } catch (e) {
           console.error(e);
