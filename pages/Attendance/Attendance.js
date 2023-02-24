@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useState, useEffect } from "react";
 import React from "react";
 import DropDownPicker from "react-native-dropdown-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getBatchesUnderCourse, getAllCourses } from "../../model/attendance";
 
 const Attendance = ({ navigation }) => {
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
@@ -20,52 +20,16 @@ const Attendance = ({ navigation }) => {
 
   const onCourseSelectionChange = async (courseId) => {
     //console.log(courseId);
-    try {
-      const value = await AsyncStorage.getItem("Courses");
-      if (value !== null) {
-        const batchesArray = [];
-        let parsedCourses = JSON.parse(value);
-        const index = parsedCourses.findIndex((item) => item.id === courseId);
-        let parsedBatches = await AsyncStorage.getItem("Batches");
-        parsedBatches = JSON.parse(parsedBatches);
-        parsedCourses[index]?.batches.forEach((item) => {
-          console.log(item);
-          try {
-            const iindex = parsedBatches.findIndex((batch) => batch.id === item);
-            if (iindex !== -1) {
-              batchesArray.push({ label: parsedBatches[iindex].batchName, value: parsedBatches[iindex].id });
-            }
-            setBatchData(value);
-          } catch (e) {}
-        });
-
-        setBatches(batchesArray);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    const data = await getBatchesUnderCourse(courseId);
+    setBatches(data);
   };
+ 
+  const getData = async () => {
+    const data = await getAllCourses();
+    setCourses(data);
+  }
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const value = await AsyncStorage.getItem("Courses");
-        if (value !== null) {
-          //setCourses(JSON.parse(value));
-          const courseArray = [];
-          const parsed = JSON.parse(value);
-          parsed.forEach((item) => {
-            courseArray.push({ label: item.courseName, value: item.id });
-          });
-          setCourses(courseArray);
-          // console.log(courseArray);
-        } else {
-          console.log("value not found");
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
     getData();
   }, []);
 

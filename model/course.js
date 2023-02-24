@@ -5,7 +5,7 @@ export const getAllCourses = async () => {
   try {
     const value = await AsyncStorage.getItem("Courses");
     if (value !== null) {
-      console.log("Set value: " + value);
+      // console.log("Set value: " + value);
       return JSON.parse(value);
     } else {
       console.log("value not found");
