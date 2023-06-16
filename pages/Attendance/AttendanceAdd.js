@@ -82,7 +82,7 @@ const AttendanceAdd = ({ route }) => {
         let courseInfo = JSON.parse(value);
         const index = courseInfo.findIndex((item) => item.id === courseId);
         setIndexOfCourse(index);
-        setCourseName(courseInfo[index].courseName);
+        setCourseName(courseInfo[index].courseCode);
       } else {
         console.log("Error: No batches found");
       }

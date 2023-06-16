@@ -6,6 +6,7 @@ import {
   Button,
   StyleSheet,
   FlatList,
+  Pressable,
 } from "react-native";
 import { useFonts, Jost_400Regular } from "@expo-google-fonts/jost";
 import { useState, useEffect } from "react";
@@ -31,11 +32,11 @@ const Home = ({ navigation }) => {
   }, []);
 
   const handleCourseClick = (course) => {
-    // console.log(course);
+    console.log(course);
     const courseId = course.id;
-    const courseName = course.courseName;
-    navigation.navigate("CourseInfo", {courseId, courseName});
-  }
+    const courseName = course.courseCode;
+    navigation.navigate("CourseInfo", { courseId, courseName });
+  };
 
   return (
     <View style={styles.bigContainer}>
@@ -45,7 +46,7 @@ const Home = ({ navigation }) => {
       </View>
       <View style={styles.courseHeader}>
         <Text style={styles.basicText}>Your Courses</Text>
-        <TouchableOpacity onPress={()=> navigation.navigate("Courses")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Courses")}>
           <Text style={styles.basicText}>Show All</Text>
         </TouchableOpacity>
       </View>
@@ -62,10 +63,8 @@ const Home = ({ navigation }) => {
                 handleCourseClick(item);
               }}
             >
-              <Text style={styles.courseTextStyle}>{item.courseName}</Text>
-              <Text style={[styles.courseSubTextStyle]}>
-                {item.courseCode}
-              </Text>
+              <Text style={styles.courseTextStyle}>{item.courseId}</Text>
+              <Text style={[styles.courseSubTextStyle]}>{item.courseCode}</Text>
             </TouchableOpacity>
           )}
         ></FlatList>
@@ -76,24 +75,33 @@ const Home = ({ navigation }) => {
         title="Batches"
         onPress={() => navigation.navigate("Batches")}
       ></Button> */}
-      <Button
+      {/* <Button
         title="Attendance"
         onPress={() => navigation.navigate("Attendance")}
-      ></Button>
-      <Button
-        title="Export"
+      ></Button> */}
+      <Pressable
+        style={styles.button}
         onPress={() => navigation.navigate("Export")}
-      ></Button>
-      <Button title="CLEAR ALL" onPress={() => clearAll()}></Button>
+      >
+        <Text>Export Attendance</Text>
+      </Pressable>
+      {/* <Button title="CLEAR ALL" onPress={() => clearAll()}></Button> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  button: {
+    margin: 8,
+    borderRadius: 20,
+    padding: 20,
+    elevation: 2,
+    backgroundColor: "#2196F3",
+  },
   courseHeader: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingEnd: 20,
   },
   basicText: {
@@ -148,7 +156,6 @@ const styles = StyleSheet.create({
     fontFamily: "Jost_400Regular",
     color: "black",
   },
-  
 });
 
 export default Home;

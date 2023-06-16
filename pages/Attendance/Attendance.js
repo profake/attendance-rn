@@ -14,7 +14,9 @@ const Attendance = ({ navigation }) => {
   const [batches, setBatches] = useState([]);
 
   const handleAddAttendance = (selectedCourse, selectedBatch) => {
-    // console.log(selectedBatch);
+    console.log("Course=" +  selectedCourse);
+    console.log("Batch=" + selectedBatch);
+    
     navigation.navigate("AttendanceAdd", { selectedCourse, selectedBatch });
   };
 

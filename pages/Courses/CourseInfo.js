@@ -20,8 +20,8 @@ const CourseInfo = ({ route, navigation }) => {
   const [selectedBatches, setSelectedBatches] = useState([]);
 
   const handleBatchPress = (batchId, batchName) => {
-    // console.log(batchId);
-    navigation.navigate("BatchInfo", { batchId, batchName });
+    console.log(courseId);
+    navigation.navigate("BatchInfo", { courseId, batchId, batchName });
   };
 
   const handleAddSelectedBatchesToCourse = async (batchIds) => {
@@ -114,10 +114,15 @@ const CourseInfo = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-      <Text style={styles.textHeader}>{courseName}</Text>
-      {batchesTakingCourse && batchesTakingCourse?.length !== 0 ? (
+      {/* <Text style={styles.textHeader}>{courseName}</Text> */}
+      <View style={styles.studentInfoContainer}>
+        <Text style={styles.dateText}>{courseName}</Text>
+        <Text style={styles.timeText}>{batchesTakingCourse?.length} Batches</Text>
+      </View>
+      {batchesTakingCourse && batchesTakingCourse?.length !== 0 ? (        
         <FlatList
-          style={{ width: "100%", height: "80%" }}
+          horizontal={true}
+          style={{ width: "100%", height: "30%" }}
           data={batchesTakingCourse}
           keyExtractor={(item) => item[0]}
           renderItem={({ item }) => (
@@ -126,6 +131,7 @@ const CourseInfo = ({ route, navigation }) => {
               style={styles.courseContainer}
             >
               <Text style={styles.courseTextStyle}>{item[1]}</Text>
+              <Text style={styles.courseSubTextStyle}>21 students</Text>
             </TouchableOpacity>
           )}
         ></FlatList>
@@ -155,24 +161,34 @@ const styles = StyleSheet.create({
     height: "90%",
   },
   container: {
-    alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
     paddingTop: 20,
   },
   courseContainer: {
-    flex: 1,
-    flexDirection: "column",
-    backgroundColor: "#333333",
-    padding: 20,
+    height: 120,
+    width: 240,
+    backgroundColor: "#ffffff",
+    padding: 16,
     marginHorizontal: 10,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 4,
     marginTop: 8,
+  },
+  courseTextStyle: {
+    fontSize: 18,
+    fontFamily: "Jost_400Regular",
+    color: "black",
+    fontWeight: "bold",
+  },
+  courseSubTextStyle: {
+    fontSize: 16,
+    fontFamily: "Jost_400Regular",
+    color: "black",
   },
   text: {
     fontSize: 14,
@@ -227,12 +243,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  courseTextStyle: {
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "left",
-  },
   modalText: {
     marginBottom: 15,
     textAlign: "center",
@@ -245,5 +255,22 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderRadius: 8,
+  },
+  studentInfoContainer: {
+    width: "90%",
+    marginVertical: 10,
+    marginHorizontal: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: "white",
+    borderRadius: 16,
+    elevation: 4,
+  },dateText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 30,
+  },
+  timeText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 16,
   },
 });

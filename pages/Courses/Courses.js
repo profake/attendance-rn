@@ -89,12 +89,13 @@ const Courses = ({ navigation }) => {
             <TouchableOpacity
               style={styles.courseContainer}
               onPress={() => {
-                handleCourseClick(item.id, item.courseName);
+
+                handleCourseClick(item.id, item.courseCode);
               }}
             >
-              <Text style={styles.courseTextStyle}>{item.courseName}</Text>
+              <Text style={styles.courseTextStyle}>{item.courseCode}</Text>
               <Text style={[styles.courseTextStyle, styles.smallText]}>
-                {item.courseCode}
+                {item.courseId}
               </Text>
             </TouchableOpacity>
           )}

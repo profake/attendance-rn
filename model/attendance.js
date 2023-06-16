@@ -41,7 +41,7 @@ export const getAllCourses = async() => {
     if (value !== null) {
       const parsed = JSON.parse(value);
       parsed.forEach((item) => {
-        courseArray.push({ label: item.courseName, value: item.id });
+        courseArray.push({ label: item.courseCode, value: item.id });
       });
     return courseArray;
     } else {

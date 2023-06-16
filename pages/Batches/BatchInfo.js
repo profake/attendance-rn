@@ -11,7 +11,28 @@ import {
 } from "react-native";
 import { React, useEffect, useState } from "react";
 import Dialog from "react-native-dialog";
-import { addMultipleStudents, addSingleStudent, deleteStudent, getAllBatches } from "../../model/batch";
+import {
+  addMultipleStudents,
+  addSingleStudent,
+  deleteStudent,
+  getAllBatches,
+} from "../../model/batch";
+import { FloatingAction } from "react-native-floating-action";
+
+const fabActions = [
+  {
+    text: "Add Single",
+    icon: require("../../resources/icons/attendance_icon.png"),
+    name: "bt_single",
+    position: 2,
+  },
+  {
+    text: "Add Multiple",
+    icon: require("../../resources/icons/batch_icon.png"),
+    name: "bt_mult",
+    position: 1,
+  },
+];
 
 const BatchInfo = ({ route, navigation }) => {
   const [studentData, setStudentData] = useState([]);
@@ -26,7 +47,7 @@ const BatchInfo = ({ route, navigation }) => {
   const [studentId, onChangeStudentId] = useState();
   const [studentIdToDelete, setStudentIdToDelete] = useState();
 
-  const { batchId, batchName } = route.params;
+  const { courseId, batchId, batchName } = route.params;
 
   const getData = async () => {
     let data = await getAllBatches();
@@ -39,8 +60,18 @@ const BatchInfo = ({ route, navigation }) => {
     setStudentData(null); // very bad solution but it works for now
   };
 
-  const handleAddMultipleStudents = async (studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId) => {
-    addMultipleStudents(studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId);
+  const handleAddMultipleStudents = async (
+    studentIdRangeStart,
+    studentIdRangeEnd,
+    studentYearSession,
+    batchId
+  ) => {
+    addMultipleStudents(
+      studentIdRangeStart,
+      studentIdRangeEnd,
+      studentYearSession,
+      batchId
+    );
     setStudentData(null); // very bad solution but it works for now
   };
 
@@ -173,7 +204,12 @@ const BatchInfo = ({ route, navigation }) => {
               style={[styles.button]}
               onPress={() => {
                 setMultipleStudentModalVisible(!multipleStudentModalVisible);
-                handleAddMultipleStudents(studentIdRangeStart, studentIdRangeEnd, studentYearSession, batchId);
+                handleAddMultipleStudents(
+                  studentIdRangeStart,
+                  studentIdRangeEnd,
+                  studentYearSession,
+                  batchId
+                );
               }}
             >
               <Text style={styles.textStyle}>Add Entry</Text>
@@ -182,10 +218,17 @@ const BatchInfo = ({ route, navigation }) => {
         </View>
       </Modal>
 
-      <Text style={styles.textHeader}>{batchName}</Text>
+      {/* <Text style={styles.textHeader}>{batchName}</Text> */}
+
+      <View style={styles.studentInfoContainer}>
+        <Text style={styles.dateText}>{batchName}</Text>
+        <Text style={styles.timeText}>{studentData?.length} students</Text>
+      </View>
+
       {studentData && studentData.length !== 0 ? (
         <FlatList
-          style={{ width: "100%", height: "80%" }}
+          numColumns={2}
+          style={{ width: "100%", height: "35%" }}
           data={studentData}
           keyExtractor={(student) => student}
           renderItem={({ item }) => (
@@ -194,26 +237,46 @@ const BatchInfo = ({ route, navigation }) => {
               onLongPress={() => handleLongPress(item)}
             >
               <Text style={styles.courseTextStyle}>{item}</Text>
+              <View
+                style={{
+                  backgroundColor: "white",
+                  paddingHorizontal: 8,
+                  borderRadius: 8,
+                  marginLeft: 8,
+                }}
+              >
+                {/* ^ how many days attended */}
+                <Text>7</Text>
+              </View>
             </TouchableOpacity>
           )}
         ></FlatList>
       ) : (
         <Text style={styles.text}>No students found under this batch.</Text>
       )}
+
+      <FloatingAction
+        actions={fabActions}
+        onPressItem={(name) => {
+          name == "bt_single"
+            ? setSingleStudentModalVisible(true)
+            : setMultipleStudentModalVisible(true);
+        }}
+      />
+
+      <View style={styles.container}></View>
       <View
         style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
       >
         <Pressable
-          style={styles.button}
-          onPress={() => setSingleStudentModalVisible(true)}
+         style={styles.button}
+         onPress={()=> {
+          const selectedCourse = courseId;
+          const selectedBatch = batchId;
+          navigation.navigate("AttendanceAdd", { selectedCourse, selectedBatch });
+         }}
         >
-          <Text style={styles.textStyle}>Add Student</Text>
-        </Pressable>
-        <Pressable
-          style={styles.button}
-          onPress={() => setMultipleStudentModalVisible(true)}
-        >
-          <Text style={styles.textStyle}>Add Multiple Students</Text>
+          <Text style={styles.textStyle}>Take Attendance</Text>
         </Pressable>
       </View>
     </View>
@@ -230,7 +293,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   courseContainer: {
-    flexDirection: "column",
+    flexDirection: "row",
     backgroundColor: "#333333",
     padding: 20,
     marginHorizontal: 10,
@@ -310,5 +373,23 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderRadius: 8,
+  },
+  studentInfoContainer: {
+    width: "90%",
+    marginVertical: 10,
+    marginHorizontal: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: "white",
+    borderRadius: 16,
+    elevation: 4,
+  },
+  dateText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 30,
+  },
+  timeText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 16,
   },
 });
