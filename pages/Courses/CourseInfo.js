@@ -43,6 +43,10 @@ const CourseInfo = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
+  const handleAddBatchesButton = () => {
+    navigation.navigate("Batches");
+  };
+
   const getData = async () => {
     const data = await getDetailedCourseData(courseId);
     setBatchesTakingCourse(data.batchesArray);
@@ -65,10 +69,8 @@ const CourseInfo = ({ route, navigation }) => {
         }}
       >
         <View style={styles.modalView}>
-          <Text style={styles.textHeader}>
-            {batchesTakingCourse.length !== 0
-              ? "Update Batches"
-              : "Add Batches"}
+          <Text style={styles.textHeader}> 
+            Select Batches Taking This Course
           </Text>
           <View style={styles.buttonContainer}>
             <FlatList
@@ -89,15 +91,26 @@ const CourseInfo = ({ route, navigation }) => {
                 </Pressable>
               )}
             ></FlatList>
-            <Pressable
-              style={[styles.button]}
-              onPress={() => {
-                setModalVisible(false);
-                handleAddSelectedBatchesToCourse(selectedBatches);
-              }}
-            >
-              <Text style={styles.textStyle}>Done</Text>
-            </Pressable>
+            <View style={styles.horizontalButtonContainer}>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => {
+                  setModalVisible(false);
+                  handleAddBatchesButton();
+                }}
+              >
+                <Text style={styles.textStyle}>Add New Batch</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button]}
+                onPress={() => {
+                  setModalVisible(false);
+                  handleAddSelectedBatchesToCourse(selectedBatches);
+                }}
+              >
+                <Text style={styles.textStyle}>Confirm</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -191,6 +204,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  horizontalButtonContainer: {
+    flexDirection: "row",
+    padding: 10,
   },
   buttonContainer: {
     padding: 10,

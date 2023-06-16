@@ -72,10 +72,10 @@ const Home = ({ navigation }) => {
       ) : (
         <Text style={styles.text}>No courses found.</Text>
       )}
-      <Button
+      {/* <Button
         title="Batches"
         onPress={() => navigation.navigate("Batches")}
-      ></Button>
+      ></Button> */}
       <Button
         title="Attendance"
         onPress={() => navigation.navigate("Attendance")}
