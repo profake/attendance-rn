@@ -56,7 +56,7 @@ const BatchInfo = ({ route, navigation }) => {
   };
 
   const handleAddSingleStudent = async (studentId) => {
-    addSingleStudent(studentId, batchId);
+    addSingleStudent(studentId, batchId);F
     setStudentData(null); // very bad solution but it works for now
   };
 

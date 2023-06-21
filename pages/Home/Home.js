@@ -11,6 +11,8 @@ import {
 import { useFonts, Jost_400Regular } from "@expo-google-fonts/jost";
 import { useState, useEffect } from "react";
 import { getAllCourses } from "./../../model/course";
+import moment from "moment";
+
 const clearAll = async () => {
   try {
     await AsyncStorage.clear();
@@ -20,6 +22,8 @@ const clearAll = async () => {
 };
 
 const Home = ({ navigation }) => {
+  const [date, setDate] = useState(moment(new Date()).format("MMMM D, YYYY"));
+  const [time, setTime] = useState(moment(new Date()).format("hh:mm A"));
   const [courseData, setCourseData] = useState(null);
   useFonts({ Jost_400Regular });
 
@@ -41,8 +45,8 @@ const Home = ({ navigation }) => {
   return (
     <View style={styles.bigContainer}>
       <View style={styles.container}>
-        <Text style={styles.dateText}>February 24</Text>
-        <Text style={styles.timeText}>9:18 PM</Text>
+        <Text style={styles.dateText}>{date}</Text>
+        <Text style={styles.timeText}>{time}</Text>
       </View>
       <View style={styles.courseHeader}>
         <Text style={styles.basicText}>Your Courses</Text>
