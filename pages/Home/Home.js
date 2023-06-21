@@ -95,7 +95,7 @@ const Home = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate("Export")}
       >
-        <Text>Export Attendance</Text>
+        <Text style={styles.textStyle}>Export Attendance</Text>
       </Pressable>
       {/* <Button title="CLEAR ALL" onPress={() => clearAll()}></Button> */}
     </View>
@@ -110,6 +110,11 @@ const styles = StyleSheet.create({
     elevation: 2,
     backgroundColor: "#2196F3",
   },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
   courseHeader: {
     display: "flex",
     flexDirection: "row",
@@ -119,9 +124,10 @@ const styles = StyleSheet.create({
   basicText: {
     padding: 16,
     fontFamily: "Jost_400Regular",
-    fontsize: 18,
+    fontSize: 15,
   },
   bigContainer: {
+    paddingTop: 20,
     display: "flex",
     backgroundColor: "#f7f7f7",
     height: "100%",

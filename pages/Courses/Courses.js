@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#f2f2f2",
     paddingTop: 20,
   },
   courseContainer: {

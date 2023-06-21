@@ -58,7 +58,7 @@ const CourseInfo = ({ route, navigation }) => {
   }, [batchesTakingCourse?.length]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.bigContainer}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -159,6 +159,13 @@ const styles = StyleSheet.create({
   batchesList: {
     width: "70%",
     height: "90%",
+  },
+  bigContainer: {
+    paddingTop: 20,
+    justifyContent: "center",
+    display: "flex",
+    backgroundColor: "#f7f7f7",
+    height: "100%",
   },
   container: {
     justifyContent: "center",

@@ -56,7 +56,8 @@ const BatchInfo = ({ route, navigation }) => {
   };
 
   const handleAddSingleStudent = async (studentId) => {
-    addSingleStudent(studentId, batchId);F
+    addSingleStudent(studentId, batchId);
+    F;
     setStudentData(null); // very bad solution but it works for now
   };
 
@@ -92,7 +93,7 @@ const BatchInfo = ({ route, navigation }) => {
   }, [studentData?.length]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.bigContainer}>
       <View>
         <Dialog.Container visible={deleteDialogVisible}>
           <Dialog.Title>Delete ID</Dialog.Title>
@@ -225,7 +226,7 @@ const BatchInfo = ({ route, navigation }) => {
         <Text style={styles.timeText}>{studentData?.length} students</Text>
       </View>
 
-      {studentData && studentData.length !== 0 ? (
+      {studentData && studentData?.length !== 0 ? (
         <FlatList
           numColumns={2}
           style={{ width: "100%", height: "35%" }}
@@ -252,9 +253,38 @@ const BatchInfo = ({ route, navigation }) => {
           )}
         ></FlatList>
       ) : (
-        <Text style={styles.text}>No students found under this batch.</Text>
+        <Text style={styles.noStudentText}>No students found under this batch. Tap the button below to add.</Text>
       )}
-
+      {studentData?.length > 0  && <View
+        style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
+      >
+        <Pressable
+          style={styles.button}
+          onPress={() => {
+            const selectedCourse = courseId;
+            const selectedBatch = batchId;
+            navigation.navigate("AttendanceAdd", {
+              selectedCourse,
+              selectedBatch,
+            });
+          }}
+        >
+          <Text style={styles.textStyle}>Take Attendance</Text>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={() => {
+            const selectedCourse = courseId;
+            const selectedBatch = batchId;
+            navigation.navigate("Export", {
+              selectedCourse,
+              selectedBatch,
+            });
+          }}
+        >
+          <Text style={styles.textStyle}>Export Attendance</Text>
+        </Pressable>
+      </View>}
       <FloatingAction
         actions={fabActions}
         onPressItem={(name) => {
@@ -264,21 +294,7 @@ const BatchInfo = ({ route, navigation }) => {
         }}
       />
 
-      <View style={styles.container}></View>
-      <View
-        style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
-      >
-        <Pressable
-         style={styles.button}
-         onPress={()=> {
-          const selectedCourse = courseId;
-          const selectedBatch = batchId;
-          navigation.navigate("AttendanceAdd", { selectedCourse, selectedBatch });
-         }}
-        >
-          <Text style={styles.textStyle}>Take Attendance</Text>
-        </Pressable>
-      </View>
+      <View></View>
     </View>
   );
 };
@@ -291,6 +307,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
     paddingTop: 20,
+  },
+  bigContainer: {
+    paddingTop: 20,
+    display: "flex",
+    backgroundColor: "#f7f7f7",
+    height: "100%",
   },
   courseContainer: {
     flexDirection: "row",
@@ -305,8 +327,10 @@ const styles = StyleSheet.create({
     elevation: 1,
     marginTop: 8,
   },
-  text: {
-    fontSize: 14,
+  noStudentText: {
+    padding: 10,
+    alignContent: 'center',
+    fontSize: 16,
     color: "#333",
   },
   smallText: {

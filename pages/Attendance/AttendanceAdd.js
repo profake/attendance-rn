@@ -22,7 +22,7 @@ const AttendanceAdd = ({ route }) => {
   const [selectedStudents, setSelectedStudents] = useState([]);
 
   const [date, setDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
-  const [dateTemp, setDateTemp] = useState();
+  const [dateTemp, setDateTemp] = useState(date);
 
   const handleDateSave = () => {
     // ask user if they want to change date and overwrite current changes
@@ -133,7 +133,7 @@ const AttendanceAdd = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.textStyle}>{courseName}</Text>
-      <Text style={styles.textStyle}>{batchName}</Text>
+      <Text style={[styles.textStyle, {fontSize: 14}]}>{batchName}</Text>
       <Modal
         animationType="slide"
         transparent={true}
@@ -160,7 +160,7 @@ const AttendanceAdd = ({ route }) => {
         style={styles.datePickerContainer}
         onPress={() => setModalVisible(true)}
       >
-        <Text>Date: {date}</Text>
+        <Text style={styles.dateText}>Date: {date}</Text>
       </TouchableOpacity>
       {students && students.length !== 0 ? (
         <View style={{ width: "100%" }}>
@@ -202,6 +202,7 @@ const AttendanceAdd = ({ route }) => {
 export default AttendanceAdd;
 
 const styles = StyleSheet.create({
+  
   selected: {
     backgroundColor: "green",
   },
@@ -211,7 +212,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
-    paddingTop: 20,
   },
   button: {
     justifyContent: "center",
@@ -223,9 +223,14 @@ const styles = StyleSheet.create({
     elevation: 2,
     backgroundColor: "#2196F3",
   },
-  datePickerContainer: {
+  dateText:{
+    color: "white",
+    fontFamily: "Jost_400Regular",
+    fontSize: 16,
+  },
+  datePickerContainer: {  
     flexDirection: "column",
-    backgroundColor: "#8d93f6",
+    backgroundColor: "#2196F3",
     padding: 20,
     marginHorizontal: 10,
     borderRadius: 4,
@@ -234,7 +239,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 1,
-    marginTop: 8,
+    marginVertical: 12,
   },
   courseContainer: {
     flexDirection: "column",
@@ -250,11 +255,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   textStyle: {
+    fontFamily: "Jost_400Regular",
     color: "black",
-    fontWeight: "bold",
+    fontSize: 20,
     textAlign: "center",
   },
   courseTextStyle: {
+    fontFamily: "Jost_400Regular",
     color: "white",
     fontWeight: "bold",
   },
