@@ -35,6 +35,14 @@ const Home = ({ navigation }) => {
     getCourses();
   }, []);
 
+  const updateTime = () => setTime(moment(new Date()).format("hh:mm A"));
+
+  useEffect(() => {
+    updateTime();
+  }, []);
+  
+  setInterval(updateTime, 60000);
+
   const handleCourseClick = (course) => {
     console.log(course);
     const courseId = course.id;
