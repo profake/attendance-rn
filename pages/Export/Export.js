@@ -1,4 +1,4 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, View, Pressable } from "react-native";
 import React from "react";
 import XLSX from "xlsx";
 import * as FileSystem from "expo-file-system";
@@ -9,8 +9,29 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { getAllBatches } from "../../model/batch";
 import { getAttendanceData } from "../../model/attendance";
+import { Modal } from "react-native";
+import CalendarPicker from "react-native-calendar-picker";
+import { TouchableOpacity } from "react-native";
+import { getCourseName } from "../../model/course";
+import { getBatchName } from "../../model/batch";
 
-const Export = () => {
+const Export = ({ route }) => {
+  const { selectedCourse, selectedBatch } = route.params;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [courseName, setCourseName] = useState("");
+  const [batchName, setBatchName] = useState("");
+
+  useEffect(() => {
+    const getData = async () => {
+      const courseName = await getCourseName(selectedCourse);
+      setCourseName(courseName);
+
+      const batchName = await getBatchName(selectedBatch);
+      setBatchName(batchName);
+    };
+    getData();
+  }, []);
+
   let studentList = [];
   let attendanceInfo = [];
   const studentIdMap = new Map();
@@ -19,7 +40,7 @@ const Export = () => {
   const handleAddStudentIdsToSheet = async (worksheet) => {
     let batchInfo = await getAllBatches();
     if (batchInfo.length > 0) {
-      batchInfo = batchInfo.filter((item) => item.id === batchToExportFor);
+      batchInfo = batchInfo.filter((item) => item.id === selectedBatch);
       console.log(batchInfo[0].students);
       studentList = batchInfo[0]?.students;
       for (let i = 2; i < studentList.length + 2; i++) {
@@ -40,7 +61,7 @@ const Export = () => {
     if (value !== null) {
       for (let i = 0; i < value.length; i++) {
         if (
-          value[i].batchId === batchToExportFor &&
+          value[i].batchId === selectedBatch &&
           isInDateRange(value[i].date)
         ) {
           let data = {
@@ -80,13 +101,20 @@ const Export = () => {
     return dateVal >= startDateVal && dateVal <= endDateVal;
   };
 
-  const [batchToExportFor, setBatchToExportFor] = useState(
-    "6e7435d0-b44b-11ed-b17d-931fe2eac9f8"
-  ); // CSE 47
-  const [startDate, setStartDate] = useState(" 18-02-2023");
-  const [endDate, setEndDate] = useState("24-02-2023");
+  const onDateChange = (date, type) => {
+    console.log(
+      "Date: " + moment(date).format("DD-MM-YYYY"),
+      " | Type: " + type
+    );
+    type == "START_DATE"
+      ? setStartDate(moment(date).format("DD-MM-YYYY"))
+      : setEndDate(moment(date).format("DD-MM-YYYY"));
+  };
 
-  const doStuff = async () => {
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const exportData = async () => {
     const permissions =
       await StorageAccessFramework.requestDirectoryPermissionsAsync();
     if (!permissions.granted) {
@@ -129,11 +157,160 @@ const Export = () => {
 
   return (
     <View>
-      <Button title="Export" onPress={() => doStuff()}></Button>
+      <View style={styles.batchInfoContainer}>
+        <Text style={styles.courseText}>{courseName}</Text>
+        <Text style={styles.batchText}>{batchName}</Text>
+      </View>
+      {startDate && endDate && (
+        <View>
+          <Text style={[styles.textStyle, { color: "black" }]}>
+            Exporting data from {startDate} to {endDate}
+          </Text>
+        </View>
+      )}
+      <Pressable
+        style={styles.button}
+        onPress={() => {
+          setModalVisible(true);
+        }}
+      >
+        <Text style={styles.textStyle}>Select Dates</Text>
+      </Pressable>
+
+      {startDate && endDate && (
+        <Pressable
+          style={styles.button}
+          onPress={() => {
+            exportData();
+          }}
+        ><Text style={styles.textStyle}>Export</Text></Pressable>
+      )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <CalendarPicker
+            allowRangeSelection={true}
+            allowBackwardRangeSelect={true}
+            onDateChange={onDateChange}
+          />
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              setModalVisible(false);
+            }}
+          >
+            <Text>Confirm</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 export default Export;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  selected: {
+    backgroundColor: "green",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  dateText: {
+    color: "white",
+    fontFamily: "Jost_400Regular",
+    fontSize: 16,
+  },
+  datePickerContainer: {
+    flexDirection: "column",
+    backgroundColor: "#2196F3",
+    padding: 20,
+    marginHorizontal: 10,
+    borderRadius: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 1,
+    marginVertical: 12,
+  },
+  courseContainer: {
+    flexDirection: "column",
+    backgroundColor: "#333333",
+    padding: 20,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 1,
+    marginTop: 8,
+  },
+  textStyle: {
+    fontFamily: "Jost_400Regular",
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  courseTextStyle: {
+    fontFamily: "Jost_400Regular",
+    color: "white",
+    fontWeight: "bold",
+  },
+  modalView: {
+    height: "95%",
+    margin: 10,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+  batchInfoContainer: {
+    width: "90%",
+    marginVertical: 10,
+    marginHorizontal: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: "white",
+    borderRadius: 16,
+    elevation: 4,
+  },
+  courseText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 30,
+  },
+  batchText: {
+    fontFamily: "Jost_400Regular",
+    fontSize: 16,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    padding: 10,
+  },
+  button: {
+    width: "50%",
+    margin: 8,
+    borderRadius: 20,
+    padding: 20,
+    elevation: 2,
+    backgroundColor: "#2196F3",
+  },
+});

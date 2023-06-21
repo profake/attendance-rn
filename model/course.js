@@ -1,6 +1,23 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v1 as uuidv1 } from "uuid";
 
+export const getCourseName = async (courseId) => {
+  try {
+    const value = await AsyncStorage.getItem("Courses");
+    if (value !== null) {
+      let courseInfo = JSON.parse(value);
+      courseInfo = courseInfo.filter((item) => item.id === courseId);
+      console.log(courseInfo[0]);
+      return courseInfo[0]?.courseCode;
+    } else {
+      console.log("Error: No batches found");
+      return null;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const getAllCourses = async () => {
   try {
     const value = await AsyncStorage.getItem("Courses");

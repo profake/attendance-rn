@@ -1,6 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v1 as uuidv1 } from "uuid";
 
+export const getBatchName = async (batchId) => {
+  try {
+    const value = await AsyncStorage.getItem("Batches");
+    if (value !== null) {
+      let parsedValues = JSON.parse(value);
+      parsedValues.filter((item) => item.id === batchId);
+      return parsedValues[0]?.batchName;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export const getAllBatches = async () => {
   try {
     const value = await AsyncStorage.getItem("Batches");
