@@ -32,6 +32,18 @@ const fabActions = [
     name: "bt_mult",
     position: 1,
   },
+  {
+    text: "Take Attendance",
+    icon: require("../../resources/icons/attendance_icon.png"),
+    name: "bt_attendance_add",
+    position: 3,
+  },
+  {
+    text: "Export Attendance",
+    icon: require("../../resources/icons/attendance_icon.png"),
+    name: "bt_attendance_export",
+    position: 4,
+  },
 ];
 
 const BatchInfo = ({ route, navigation }) => {
@@ -258,39 +270,29 @@ const BatchInfo = ({ route, navigation }) => {
       {studentData?.length > 0  && <View
         style={{ flexDirection: "row", width: "90%", justifyContent: "center" }}
       >
-        <Pressable
-          style={styles.button}
-          onPress={() => {
+      </View>}
+      <FloatingAction
+        actions={fabActions}
+        onPressItem={(name) => {
+          if (name == "bt_single")
+             setSingleStudentModalVisible(true)
+          else if (name == "bt_mult")
+             setMultipleStudentModalVisible(true);
+          else if (name == "bt_attendance_add") {
             const selectedCourse = courseId;
             const selectedBatch = batchId;
             navigation.navigate("AttendanceAdd", {
               selectedCourse,
               selectedBatch,
             });
-          }}
-        >
-          <Text style={styles.textStyle}>Take Attendance</Text>
-        </Pressable>
-        <Pressable
-          style={styles.button}
-          onPress={() => {
+          } else {            
             const selectedCourse = courseId;
             const selectedBatch = batchId;
             navigation.navigate("Export", {
               selectedCourse,
               selectedBatch,
             });
-          }}
-        >
-          <Text style={styles.textStyle}>Export Attendance</Text>
-        </Pressable>
-      </View>}
-      <FloatingAction
-        actions={fabActions}
-        onPressItem={(name) => {
-          name == "bt_single"
-            ? setSingleStudentModalVisible(true)
-            : setMultipleStudentModalVisible(true);
+          }
         }}
       />
 
