@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   TouchableOpacity,
+  Modal,
+  Alert,
   View,
   Text,
   Button,
@@ -12,6 +14,7 @@ import { useFonts, Jost_400Regular } from "@expo-google-fonts/jost";
 import { useState, useEffect } from "react";
 import { getAllCourses } from "./../../model/course";
 import moment from "moment";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const clearAll = async () => {
   try {
@@ -25,6 +28,18 @@ const Home = ({ navigation }) => {
   const [date, setDate] = useState(moment(new Date()).format("MMMM D, YYYY"));
   const [time, setTime] = useState(moment(new Date()).format("hh:mm A"));
   const [courseData, setCourseData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable onPress={() => setModalVisible(true)}>
+          <Ionicons name="settings-outline" size={24} color="black" />
+        </Pressable>
+      ),
+    });
+  }, []);
+
   useFonts({ Jost_400Regular });
 
   useEffect(() => {
@@ -40,7 +55,7 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     updateTime();
   }, []);
-  
+
   setInterval(updateTime, 60000);
 
   const handleCourseClick = (course) => {
@@ -58,9 +73,9 @@ const Home = ({ navigation }) => {
       </View>
       <View style={styles.courseHeader}>
         <Text style={styles.basicText}>Your Courses</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Courses")}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate("Courses")}>
           <Text style={styles.basicText}>Show All</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       {courseData ? (
         <FlatList
@@ -79,25 +94,77 @@ const Home = ({ navigation }) => {
               <Text style={[styles.courseSubTextStyle]}>{item.courseCode}</Text>
             </TouchableOpacity>
           )}
+          ListFooterComponent={
+            <TouchableOpacity
+              style={styles.addCourseContainer}
+              onPress={() => {
+                navigation.navigate("Courses");
+              }}
+            >
+              <Text style={[styles.courseTextStyle, { color: "white" }]}>
+                Add Course
+              </Text>
+            </TouchableOpacity>
+          }
         ></FlatList>
       ) : (
-        <Text style={styles.text}>No courses found.</Text>
+        <View style={{alignItems: "center", height:"70%"}}>
+          <Text style={styles.text}>No courses found.</Text>
+          <TouchableOpacity
+            style={styles.addCourseContainer}
+            onPress={() => {
+              navigation.navigate("Courses");
+            }}
+          >
+            <Text style={[styles.courseTextStyle, { color: "white" }]}>
+              Add Course
+            </Text>
+          </TouchableOpacity>
+        </View>
       )}
-      {/* <Button
-        title="Batches"
-        onPress={() => navigation.navigate("Batches")}
-      ></Button> */}
-      {/* <Button
-        title="Attendance"
-        onPress={() => navigation.navigate("Attendance")}
-      ></Button> */}
-      <Pressable
+      {/* <Pressable
         style={styles.button}
         onPress={() => navigation.navigate("Export")}
       >
         <Text style={styles.textStyle}>Export Attendance</Text>
-      </Pressable>
+      </Pressable> */}
       {/* <Button title="CLEAR ALL" onPress={() => clearAll()}></Button> */}
+      <View>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.");
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.modalView}>
+            <Text style={[styles.textStyle, { color: "black", fontSize: 18 }]}>
+              Settings
+            </Text>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setModalVisible(false);
+                clearAll();
+              }}
+            >
+              <Text style={styles.textStyle}>Delete All Data</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "grey" }]}
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.textStyle}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
     </View>
   );
 };
@@ -129,6 +196,7 @@ const styles = StyleSheet.create({
   bigContainer: {
     paddingTop: 20,
     display: "flex",
+    justifyContent: "center",
     backgroundColor: "#f7f7f7",
     height: "100%",
   },
@@ -148,6 +216,24 @@ const styles = StyleSheet.create({
   timeText: {
     fontFamily: "Jost_400Regular",
     fontSize: 16,
+  },
+  addCourseContainer: {
+    height: 80,
+    width: 150,
+    alignSelf: "center",
+    alignItems: "center",
+    alignContent: "center",
+    justifyContent: "center",
+    backgroundColor: "#2196F3",
+    padding: 16,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 4,
+    marginTop: 8,
   },
   courseContainer: {
     height: 120,
@@ -173,6 +259,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Jost_400Regular",
     color: "black",
+  },
+  modalView: {
+    width: "100%",
+    height: "45%",
+    margin: 10,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 

@@ -21,28 +21,32 @@ import { FloatingAction } from "react-native-floating-action";
 
 const fabActions = [
   {
-    text: "Add Single",
+    text: "Add Single Student",
     icon: require("../../resources/icons/attendance_icon.png"),
     name: "bt_single",
-    position: 2,
+    color: "#2196F3",
+    position: 3,
   },
   {
-    text: "Add Multiple",
+    text: "Add Multiple Students",
     icon: require("../../resources/icons/batch_icon.png"),
     name: "bt_mult",
-    position: 1,
+    color: "#2196F3",
+    position: 2,
   },
   {
     text: "Take Attendance",
     icon: require("../../resources/icons/attendance_icon.png"),
     name: "bt_attendance_add",
-    position: 3,
+    color: "#2196F3",
+    position: 4,
   },
   {
     text: "Export Attendance",
     icon: require("../../resources/icons/attendance_icon.png"),
     name: "bt_attendance_export",
-    position: 4,
+    color: "#2148f3",
+    position: 1,
   },
 ];
 
@@ -241,7 +245,7 @@ const BatchInfo = ({ route, navigation }) => {
       {studentData && studentData?.length !== 0 ? (
         <FlatList
           numColumns={2}
-          style={{ width: "100%", height: "35%" }}
+          style={{ width: "100%", height: "35%", marginBottom: 20}}
           data={studentData}
           keyExtractor={(student) => student}
           renderItem={({ item }) => (
@@ -250,17 +254,6 @@ const BatchInfo = ({ route, navigation }) => {
               onLongPress={() => handleLongPress(item)}
             >
               <Text style={styles.courseTextStyle}>{item}</Text>
-              <View
-                style={{
-                  backgroundColor: "white",
-                  paddingHorizontal: 8,
-                  borderRadius: 8,
-                  marginLeft: 8,
-                }}
-              >
-                {/* ^ how many days attended */}
-                <Text>7</Text>
-              </View>
             </TouchableOpacity>
           )}
         ></FlatList>
@@ -272,6 +265,8 @@ const BatchInfo = ({ route, navigation }) => {
       >
       </View>}
       <FloatingAction
+        color="#2196F3"
+        
         actions={fabActions}
         onPressItem={(name) => {
           if (name == "bt_single")

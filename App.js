@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Button, Pressable } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "./pages/Home/Home";
@@ -10,12 +10,14 @@ import Attendance from "./pages/Attendance/Attendance";
 import AttendanceAdd from "./pages/Attendance/AttendanceAdd";
 import Export from "./pages/Export/Export";
 import { useFonts, Jost_400Regular } from "@expo-google-fonts/jost";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function App() {
   let [fontsLoaded] = useFonts({
     Jost_400Regular,
   });
   const Stack = createNativeStackNavigator();
+
   if (fontsLoaded) {
     return (
       <NavigationContainer>
@@ -28,7 +30,7 @@ export default function App() {
             },
           }}
         >
-          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Home" component={Home} options={({ navigation }) => ({title: "Home",})} />
           <Stack.Screen name="Courses" component={Courses} />
           <Stack.Screen name="Batches" component={Batches} />
           <Stack.Screen name="BatchInfo" component={BatchInfo} />

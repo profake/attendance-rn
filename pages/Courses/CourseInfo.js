@@ -73,6 +73,7 @@ const CourseInfo = ({ route, navigation }) => {
             Select Batches Taking This Course
           </Text>
           <View style={styles.buttonContainer}>
+            {!allBatches && <Text>No batches found. Please add a new batch with the button</Text>}
             <FlatList
               numColumns={2}
               style={styles.batchesList}

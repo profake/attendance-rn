@@ -161,10 +161,17 @@ const Export = ({ route }) => {
         <Text style={styles.courseText}>{courseName}</Text>
         <Text style={styles.batchText}>{batchName}</Text>
       </View>
-      {startDate && endDate && (
+      <View style={styles.container}>
+      {startDate && endDate ? (
         <View>
           <Text style={[styles.textStyle, { color: "black" }]}>
             Exporting data from {startDate} to {endDate}
+          </Text>
+        </View>
+      ) : (
+        <View>
+          <Text style={[styles.textStyle, { color: "black" }]}>
+            Select dates to Export
           </Text>
         </View>
       )}
@@ -183,8 +190,11 @@ const Export = ({ route }) => {
           onPress={() => {
             exportData();
           }}
-        ><Text style={styles.textStyle}>Export</Text></Pressable>
+        >
+          <Text style={styles.textStyle}>Export</Text>
+        </Pressable>
       )}
+      </View>
 
       <Modal
         animationType="slide"
@@ -222,7 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
   },
   container: {
-    flex: 1,
+    width: "100%",    
     justifyContent: "center",
     alignItems: "center",
     justifyContent: "center",
