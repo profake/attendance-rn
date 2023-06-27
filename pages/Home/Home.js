@@ -93,8 +93,8 @@ const Home = ({ navigation }) => {
                 handleCourseClick(item);
               }}
             >
-              <Text style={styles.courseTextStyle}>{item.courseId}</Text>
-              <Text style={[styles.courseSubTextStyle]}>{item.courseCode}</Text>
+              <Text style={styles.courseTextStyle}>{item.courseCode}</Text>
+              <Text style={[styles.courseSubTextStyle]}>{item.courseName}</Text>
             </TouchableOpacity>
           )}
           ListFooterComponent={

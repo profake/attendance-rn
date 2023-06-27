@@ -17,28 +17,24 @@ const Courses = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, onChangeCourseName] = useState("");
   const [courseCode, onChangeCourseCode] = useState("");
-  const [dataWasUpdated, setDataWasUpdated] = useState(false);
 
   const handleAddEntry = async (courseCode, courseName) => {
-    setCourseData(addCourse(courseCode, courseName));
-    setDataWasUpdated(true);
+    setCourseData(await addCourse(courseCode, courseName));
   };
 
   const handleCourseClick = (courseId, courseName) => {
     navigation.navigate("CourseInfo", { courseId, courseName });
   };
+  
+  const getData = async () => {
+      console.log("Hello");
+      const data = await getAllCourses();
+      setCourseData(data);
+  };
 
   useEffect(() => {
-    getData();
-  }, [dataWasUpdated, courseData?.length]);
-
-  const getData = async () => {
-    const data = await getAllCourses();
-    if (dataWasUpdated) {
-      setCourseData(data);
-      setDataWasUpdated(false);
-    }
-  };
+      getData();
+  }, [courseData?.length]);
 
   return (
     <View style={styles.container}>
@@ -99,7 +95,7 @@ const Courses = ({ navigation }) => {
             >
               <Text style={styles.courseTextStyle}>{item.courseCode}</Text>
               <Text style={[styles.courseTextStyle, styles.smallText]}>
-                {item.courseId}
+                {item.courseName} {/* This is actually the id */}
               </Text>
             </TouchableOpacity>
           )}

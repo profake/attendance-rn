@@ -16,20 +16,15 @@ const Batches = ({navigation}) => {
   const [batchData, setBatchData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [batchName, onChangeBatchName] = useState("");
-  const [dataWasUpdated, setDataWasUpdated] = useState(true);
   
   const handleAddEntry = async (batchName) => {
-    setBatchData(addNewBatch(batchName));
-    setDataWasUpdated(true);
+    setBatchData(await addNewBatch(batchName));
   };
 
 
   const getData = async () => {
     const data = await getAllBatches();
-    if (dataWasUpdated) {      
       setBatchData(data);
-      setDataWasUpdated(false);
-    }
   };
 
   const showBatchInfo = (batchId, batchName) => {
@@ -38,7 +33,7 @@ const Batches = ({navigation}) => {
 
   useEffect(() => {
     getData();
-  }, [dataWasUpdated, batchData?.length]);
+  }, [batchData?.length]);
 
   return (
     <View style={styles.container}>
