@@ -15,10 +15,12 @@ import { useState, useEffect } from "react";
 import { getAllCourses } from "./../../model/course";
 import moment from "moment";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useIsFocused } from "@react-navigation/native";
 
 const clearAll = async () => {
   try {
     await AsyncStorage.clear();
+    setCourseData(null);
   } catch (e) {
     // clear error
   }
@@ -29,6 +31,9 @@ const Home = ({ navigation }) => {
   const [time, setTime] = useState(moment(new Date()).format("hh:mm A"));
   const [courseData, setCourseData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const isFocused = useIsFocused();
+  
+  useFonts({ Jost_400Regular });
 
   useEffect(() => {
     navigation.setOptions({
@@ -40,15 +45,13 @@ const Home = ({ navigation }) => {
     });
   }, []);
 
-  useFonts({ Jost_400Regular });
-
   useEffect(() => {
     const getCourses = async () => {
-      const data = await getAllCourses();
+      data = await getAllCourses();
       setCourseData(data);
     };
     getCourses();
-  }, []);
+  }, [isFocused, courseData]);
 
   const updateTime = () => setTime(moment(new Date()).format("hh:mm A"));
 

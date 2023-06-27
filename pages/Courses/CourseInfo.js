@@ -18,6 +18,7 @@ const CourseInfo = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [allBatches, setAllBatches] = useState();
   const [selectedBatches, setSelectedBatches] = useState([]);
+  const [doneSelecting, setDoneSelecting] = useState(true);
 
   const handleBatchPress = (batchId, batchName) => {
     console.log(courseId);
@@ -26,6 +27,7 @@ const CourseInfo = ({ route, navigation }) => {
 
   const handleAddSelectedBatchesToCourse = async (batchIds) => {
     addSelectedBatchesToCourse(courseId, batchIds);
+    setDoneSelecting(true);
   };
 
   const handleBatchSelection = (courseId) => {
@@ -51,11 +53,12 @@ const CourseInfo = ({ route, navigation }) => {
     const data = await getDetailedCourseData(courseId);
     setBatchesTakingCourse(data.batchesArray);
     setSelectedBatches(data.selectedBatchesArray);
+    setDoneSelecting(false);
   };
 
   useEffect(() => {
     getData();
-  }, [batchesTakingCourse?.length]);
+  }, [doneSelecting, batchesTakingCourse?.length]);
 
   return (
     <View style={styles.bigContainer}>

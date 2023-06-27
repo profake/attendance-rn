@@ -17,9 +17,11 @@ const Courses = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, onChangeCourseName] = useState("");
   const [courseCode, onChangeCourseCode] = useState("");
+  const [dataWasUpdated, setDataWasUpdated] = useState(false);
 
   const handleAddEntry = async (courseCode, courseName) => {
     setCourseData(addCourse(courseCode, courseName));
+    setDataWasUpdated(true);
   };
 
   const handleCourseClick = (courseId, courseName) => {
@@ -28,11 +30,14 @@ const Courses = ({ navigation }) => {
 
   useEffect(() => {
     getData();
-  }, [courseData?.length]);
+  }, [dataWasUpdated, courseData?.length]);
 
   const getData = async () => {
     const data = await getAllCourses();
-    setCourseData(data);
+    if (dataWasUpdated) {
+      setCourseData(data);
+      setDataWasUpdated(false);
+    }
   };
 
   return (
@@ -89,7 +94,6 @@ const Courses = ({ navigation }) => {
             <TouchableOpacity
               style={styles.courseContainer}
               onPress={() => {
-
                 handleCourseClick(item.id, item.courseCode);
               }}
             >
