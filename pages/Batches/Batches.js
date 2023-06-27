@@ -21,7 +21,6 @@ const Batches = ({navigation}) => {
     setBatchData(await addNewBatch(batchName));
   };
 
-
   const getData = async () => {
     const data = await getAllBatches();
       setBatchData(data);

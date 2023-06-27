@@ -21,8 +21,8 @@ const CourseInfo = ({ route, navigation }) => {
   const [doneSelecting, setDoneSelecting] = useState(true);
 
   const handleBatchPress = (batchId, batchName) => {
-    console.log(courseId);
-    navigation.navigate("BatchInfo", { courseId, batchId, batchName });
+    console.log(courseName);
+    navigation.navigate("BatchInfo", { courseId, courseName, batchId, batchName });
   };
 
   const handleAddSelectedBatchesToCourse = async (batchIds) => {

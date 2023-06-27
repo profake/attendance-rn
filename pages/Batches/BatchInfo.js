@@ -49,7 +49,22 @@ const fabActions = [
     position: 1,
   },
 ];
-
+const fabActionsReduced = [
+  {
+    text: "Add Single Student",
+    icon: require("../../resources/icons/attendance_icon.png"),
+    name: "bt_single",
+    color: "#2196F3",
+    position: 2,
+  },
+  {
+    text: "Add Multiple Students",
+    icon: require("../../resources/icons/batch_icon.png"),
+    name: "bt_mult",
+    color: "#2196F3",
+    position: 1,
+  },
+];
 const BatchInfo = ({ route, navigation }) => {
   const [studentData, setStudentData] = useState([]);
   const [studentYearSession, onChangeYearSession] = useState("");
@@ -63,7 +78,7 @@ const BatchInfo = ({ route, navigation }) => {
   const [studentId, onChangeStudentId] = useState();
   const [studentIdToDelete, setStudentIdToDelete] = useState();
 
-  const { courseId, batchId, batchName } = route.params;
+  const { courseId, courseName, batchId, batchName } = route.params;
 
   const getData = async () => {
     let data = await getAllBatches();
@@ -73,7 +88,6 @@ const BatchInfo = ({ route, navigation }) => {
 
   const handleAddSingleStudent = async (studentId) => {
     addSingleStudent(studentId, batchId);
-    F;
     setStudentData(null); // very bad solution but it works for now
   };
 
@@ -240,6 +254,7 @@ const BatchInfo = ({ route, navigation }) => {
       <View style={styles.studentInfoContainer}>
         <Text style={styles.dateText}>{batchName}</Text>
         <Text style={styles.timeText}>{studentData?.length} students</Text>
+        {courseName && <Text style={styles.timeText}>{courseName}</Text>}
       </View>
 
       {studentData && studentData?.length !== 0 ? (
@@ -267,7 +282,7 @@ const BatchInfo = ({ route, navigation }) => {
       <FloatingAction
         color="#2196F3"
         
-        actions={fabActions}
+        actions={courseId ? fabActions : fabActionsReduced}
         onPressItem={(name) => {
           if (name == "bt_single")
              setSingleStudentModalVisible(true)

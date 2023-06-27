@@ -75,7 +75,6 @@ const AttendanceAdd = ({ route }) => {
   };
 
   const getData = async () => {
-    // console.log(selectedStudents);
     try {
       const value = await AsyncStorage.getItem("Courses");
       if (value !== null) {
