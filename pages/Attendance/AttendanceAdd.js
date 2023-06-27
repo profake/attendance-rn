@@ -8,16 +8,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import CalendarPicker from "react-native-calendar-picker";
 import moment from "moment";
+import { getCourseName, getBatchData, getAttendance, saveAttendance } from "../../model/attendance";
 
 const AttendanceAdd = ({ route }) => {
   const { selectedCourse: courseId, selectedBatch: batchId } = route.params;
   const [batchName, setBatchName] = useState();
   const [courseName, setCourseName] = useState();
   const [students, setStudents] = useState();
-  const [indexOfCourse, setIndexOfCourse] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
 
@@ -28,7 +27,7 @@ const AttendanceAdd = ({ route }) => {
     // ask user if they want to change date and overwrite current changes
     // keep a flag to check if there are changes
     setDate(dateTemp);
-    getAttendance(dateTemp);
+    getAttendanceFromDate(dateTemp);
     setModalVisible(false);
   };
 
@@ -39,22 +38,8 @@ const AttendanceAdd = ({ route }) => {
       batchId,
       students: selectedStudents,
     };
-    console.log("Saving following: " + date + courseId + batchId + attendance.students);
-    let value = await AsyncStorage.getItem("Attendance");
-    value = JSON.parse(value);
-    if (value) {
-      console.log(value);
-      const index = value.findIndex((item) => item.date === attendance.date);
-      if (index !== -1) {
-        //console.log(item);
-        value[index] = attendance;
-      } else {
-        value.push(attendance);
-      }
-    } else {
-      value = [attendance];
-    }
-    await AsyncStorage.setItem("Attendance", JSON.stringify(value));
+    //console.log("Saving following: " + date + courseId + batchId + attendance.students);
+    await saveAttendance(attendance);
   };
 
   const handleStudentOnclick = (studentId) => {
@@ -70,63 +55,52 @@ const AttendanceAdd = ({ route }) => {
   };
 
   const onDateChange = (date) => {
-    // console.log(date
     setDateTemp(moment(date).format("DD-MM-YYYY"));
   };
 
+  // const getData = async () => {
+  //   try {
+  //     const value = await AsyncStorage.getItem("Courses");
+  //     if (value !== null) {
+  //       let courseInfo = JSON.parse(value);
+  //       const index = courseInfo.findIndex((item) => item.id === courseId);
+  //       setIndexOfCourse(index);
+  //       setCourseName(courseInfo[index].courseCode);
+  //     } else {
+  //       console.log("Error: No batches found");
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  //   try {
+  //     let value = await AsyncStorage.getItem("Batches");
+  //     value = JSON.parse(value);
+  //     const index = value.findIndex((item) => item.id === batchId);
+  //     if (index !== -1) {
+  //       setBatchName(value[index].batchName);
+  //       setStudents(value[index].students);
+  //     }
+  //     setBatchData(value);
+  //   } catch (e) {}
+  // };
+
   const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Courses");
-      if (value !== null) {
-        let courseInfo = JSON.parse(value);
-        const index = courseInfo.findIndex((item) => item.id === courseId);
-        setIndexOfCourse(index);
-        setCourseName(courseInfo[index].courseCode);
-      } else {
-        console.log("Error: No batches found");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    try {
-      let value = await AsyncStorage.getItem("Batches");
-      value = JSON.parse(value);
-      const index = value.findIndex((item) => item.id === batchId);
-      if (index !== -1) {
-        setBatchName(value[index].batchName);
-        setStudents(value[index].students);
-      }
-      setBatchData(value);
-    } catch (e) {}
+    const courseName = await getCourseName(courseId);
+    setCourseName(courseName);
+
+    const batchData = await getBatchData(batchId);
+    setBatchName(batchData.batchName);
+    setStudents(batchData.students);
   };
 
-  const getAttendance = async (date) => {
-    try {
-      const value = await AsyncStorage.getItem("Attendance");
-      if (value !== null) {
-        let attendance = JSON.parse(value);
-        const index = attendance.findIndex(
-          (item) =>
-            item.date === date &&
-            item.courseId === courseId &&
-            item.batchId === batchId
-        );
-        if (index !== -1) {
-          console.log("Got attendance for date: " + attendance[index].date);
-          setSelectedStudents(attendance[index].students);
-        } else {
-          setSelectedStudents([]);
-          console.log("No attendance for date: " + date);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const getAttendanceFromDate = async (date) => {
+    const data = await getAttendance(date, courseId, batchId);
+    setSelectedStudents(data);
   };
 
   useEffect(() => {
     getData();
-    getAttendance(date);
+    getAttendanceFromDate(date);
   }, []);
 
   return (
@@ -174,7 +148,7 @@ const AttendanceAdd = ({ route }) => {
                   handleStudentOnclick(item);
                 }}
                 style={
-                  selectedStudents.includes(item)
+                  selectedStudents?.includes(item)
                     ? [styles.courseContainer, styles.selected]
                     : [styles.courseContainer]
                 }
