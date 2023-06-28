@@ -261,7 +261,7 @@ const BatchInfo = ({ route, navigation }) => {
           <View style={{paddingRight: 100}}>
           <FlatList
           numColumns={2}
-          style={{ width: "100%", height: "100%", marginBottom: 20}}
+          style={{ width: "100%", height: "70%"}}
           data={studentData}
           keyExtractor={(student) => student}
           renderItem={({ item }) => (
