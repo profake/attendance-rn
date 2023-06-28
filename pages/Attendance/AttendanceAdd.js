@@ -10,6 +10,8 @@ import {
 import React, { useEffect, useState } from "react";
 import CalendarPicker from "react-native-calendar-picker";
 import moment from "moment";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 import {
   getCourseName,
   getBatchData,
@@ -26,20 +28,20 @@ const AttendanceAdd = ({ route }) => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [selectedStudentsBackup, setSelectedStudentsBackup] = useState([]);
   const [hasClickedItem, setHasClickedItem] = useState(false);
-  const [date, setDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
+  const [date, setDate] = useState(moment(new Date()));
   const [dateTemp, setDateTemp] = useState(date);
 
   const handleDateSave = () => {
     // ask user if they want to change date and overwrite current changes
     // keep a flag to check if there are changes
     setDate(dateTemp);
-    getAttendanceFromDate(dateTemp);
     setModalVisible(false);
   };
 
   const handleAttendanceSave = async () => {
+    const formattedDate = moment(date).format("DD-MM-YYYY");
     let attendance = {
-      date,
+      date: formattedDate,
       courseId,
       batchId,
       students: selectedStudents,
@@ -70,8 +72,9 @@ const AttendanceAdd = ({ route }) => {
   };
 
   const onDateChange = (date) => {
-    setDateTemp(moment(date).format("DD-MM-YYYY"));
+    setDateTemp(moment(date));
   };
+
   const getData = async () => {
     const courseName = await getCourseName(courseId);
     setCourseName(courseName);
@@ -82,7 +85,13 @@ const AttendanceAdd = ({ route }) => {
   };
 
   const getAttendanceFromDate = async (date) => {
-    const data = await getAttendance(date, courseId, batchId);
+    console.log(date);
+    console.log(moment(date).format("DD-MM-YYYY"));
+    const data = await getAttendance(
+      moment(date).format("DD-MM-YYYY"),
+      courseId,
+      batchId
+    );
     setSelectedStudents(data);
   };
 
@@ -90,6 +99,10 @@ const AttendanceAdd = ({ route }) => {
     getData();
     getAttendanceFromDate(date);
   }, []);
+
+  useEffect(() => {
+    getAttendanceFromDate(date);
+  }, [date]);
 
   return (
     <View style={styles.container}>
@@ -113,16 +126,41 @@ const AttendanceAdd = ({ route }) => {
               handleDateSave();
             }}
           >
-            <Text>Confirm</Text>
+            <Text style={styles.dateText}>Confirm</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-      <TouchableOpacity
-        style={styles.datePickerContainer}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.dateText}>Date: {date}</Text>
-      </TouchableOpacity>
+      <View flexDirection="row" alignSelf="center">
+        <TouchableOpacity
+          style={[
+            styles.button,
+            { padding: 0, width: 35, height: 35, alignItems: "center" },
+          ]}
+          onPress={() => {
+            setDate(moment(date).subtract(1, "d"));
+            console.log(moment(date).subtract(1, "d"));
+          }}
+        >
+          <Ionicons name="chevron-back" size={16} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.datePickerContainer}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.dateText}>Date: {moment(date).format("DD-MM-YYYY")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            { padding: 0, width: 35, height: 35, alignItems: "center" },
+          ]}
+          onPress={() => {
+            setDate(moment(date).add(1, "d"));
+          }}
+        >
+          <Ionicons name="chevron-forward" size={16} color="white" />
+        </TouchableOpacity>
+      </View>
       {students && students.length !== 0 ? (
         <View style={{ width: "85%" }}>
           <FlatList
@@ -200,7 +238,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   datePickerContainer: {
-    flexDirection: "column",
     backgroundColor: "#2196F3",
     padding: 20,
     marginHorizontal: 10,

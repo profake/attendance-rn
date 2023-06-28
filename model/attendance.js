@@ -94,7 +94,7 @@ export const saveAttendance = async(attendance) => {
       console.log(value);
       const index = value.findIndex((item) => item.date === attendance.date);
       if (index !== -1) {
-        //console.log(item);
+        // console.log("Found: " + item);
         value[index] = attendance;
       } else {
         value.push(attendance);
