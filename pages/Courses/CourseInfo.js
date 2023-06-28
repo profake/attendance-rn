@@ -124,7 +124,9 @@ const CourseInfo = ({ route, navigation }) => {
         <Text style={styles.timeText}>{batchesTakingCourse?.length} Batches</Text>
       </View>
       {batchesTakingCourse && batchesTakingCourse?.length !== 0 ? (        
-        <FlatList
+        <View style={{ width: "100%", height: "65%" }}>
+          <Text style={styles.courseSubTextStyle}>Batches taking this course</Text>
+          <FlatList
           horizontal={true}
           style={{ width: "100%", height: "30%" }}
           data={batchesTakingCourse}
@@ -135,10 +137,11 @@ const CourseInfo = ({ route, navigation }) => {
               style={styles.courseContainer}
             >
               <Text style={styles.courseTextStyle}>{item[1]}</Text>
-              <Text style={styles.courseSubTextStyle}>21 students</Text>
+              {/* <Text style={styles.courseSubTextStyle}>21 students</Text> */}
             </TouchableOpacity>
           )}
         ></FlatList>
+        </View>
       ) : (
         <Text style={styles.text}>No batches found under this course.</Text>
       )}
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   courseTextStyle: {
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: "Jost_400Regular",
     color: "black",
     fontWeight: "bold",
@@ -200,6 +203,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Jost_400Regular",
     color: "black",
+    padding: 16,
   },
   text: {
     fontSize: 14,

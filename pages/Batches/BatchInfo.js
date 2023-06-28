@@ -258,9 +258,10 @@ const BatchInfo = ({ route, navigation }) => {
       </View>
 
       {studentData && studentData?.length !== 0 ? (
-        <FlatList
+          <View style={{paddingRight: 100}}>
+          <FlatList
           numColumns={2}
-          style={{ width: "100%", height: "35%", marginBottom: 20}}
+          style={{ width: "100%", height: "100%", marginBottom: 20}}
           data={studentData}
           keyExtractor={(student) => student}
           renderItem={({ item }) => (
@@ -272,6 +273,7 @@ const BatchInfo = ({ route, navigation }) => {
             </TouchableOpacity>
           )}
         ></FlatList>
+        </View>
       ) : (
         <Text style={styles.noStudentText}>No students found under this batch. Tap the button below to add.</Text>
       )}

@@ -73,16 +73,16 @@ export const getAttendance = async (date, courseId, batchId) => {
             item.courseId === courseId &&
             item.batchId === batchId
         );
-        if (index !== -1) {
+        if (index != -1) {
           console.log("Got attendance for date: " + attendance[index].date);
           return attendance[index].students;
         } else {
           console.log("No attendance for date: " + date);
           return [];
         }
-      }
+      } else return [];
     } catch (e) {
-      console.error(e);
+      console.error("MyError: "+e);
     }
   };
 

@@ -10,7 +10,12 @@ import {
 import React, { useEffect, useState } from "react";
 import CalendarPicker from "react-native-calendar-picker";
 import moment from "moment";
-import { getCourseName, getBatchData, getAttendance, saveAttendance } from "../../model/attendance";
+import {
+  getCourseName,
+  getBatchData,
+  getAttendance,
+  saveAttendance,
+} from "../../model/attendance";
 
 const AttendanceAdd = ({ route }) => {
   const { selectedCourse: courseId, selectedBatch: batchId } = route.params;
@@ -19,7 +24,8 @@ const AttendanceAdd = ({ route }) => {
   const [students, setStudents] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
-
+  const [selectedStudentsBackup, setSelectedStudentsBackup] = useState([]);
+  const [hasClickedItem, setHasClickedItem] = useState(false);
   const [date, setDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
   const [dateTemp, setDateTemp] = useState(date);
 
@@ -40,11 +46,20 @@ const AttendanceAdd = ({ route }) => {
     };
     //console.log("Saving following: " + date + courseId + batchId + attendance.students);
     await saveAttendance(attendance);
+    setHasClickedItem(false);
+  };
+
+  const handleCancelSelection = () => {
+    setSelectedStudents(selectedStudentsBackup);
+    setSelectedStudentsBackup([]);
+    setHasClickedItem(false);
   };
 
   const handleStudentOnclick = (studentId) => {
     console.log(studentId);
     let array = [...selectedStudents]; // make a separate copy of the array
+    if (!hasClickedItem) setSelectedStudentsBackup([...selectedStudents]);
+    setHasClickedItem(true);
     const index = array.indexOf(studentId);
     if (index !== -1) {
       array.splice(index, 1);
@@ -57,33 +72,6 @@ const AttendanceAdd = ({ route }) => {
   const onDateChange = (date) => {
     setDateTemp(moment(date).format("DD-MM-YYYY"));
   };
-
-  // const getData = async () => {
-  //   try {
-  //     const value = await AsyncStorage.getItem("Courses");
-  //     if (value !== null) {
-  //       let courseInfo = JSON.parse(value);
-  //       const index = courseInfo.findIndex((item) => item.id === courseId);
-  //       setIndexOfCourse(index);
-  //       setCourseName(courseInfo[index].courseCode);
-  //     } else {
-  //       console.log("Error: No batches found");
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  //   try {
-  //     let value = await AsyncStorage.getItem("Batches");
-  //     value = JSON.parse(value);
-  //     const index = value.findIndex((item) => item.id === batchId);
-  //     if (index !== -1) {
-  //       setBatchName(value[index].batchName);
-  //       setStudents(value[index].students);
-  //     }
-  //     setBatchData(value);
-  //   } catch (e) {}
-  // };
-
   const getData = async () => {
     const courseName = await getCourseName(courseId);
     setCourseName(courseName);
@@ -106,7 +94,7 @@ const AttendanceAdd = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.textStyle}>{courseName}</Text>
-      <Text style={[styles.textStyle, {fontSize: 14}]}>{batchName}</Text>
+      <Text style={[styles.textStyle, { fontSize: 14 }]}>{batchName}</Text>
       <Modal
         animationType="slide"
         transparent={true}
@@ -136,9 +124,9 @@ const AttendanceAdd = ({ route }) => {
         <Text style={styles.dateText}>Date: {date}</Text>
       </TouchableOpacity>
       {students && students.length !== 0 ? (
-        <View style={{ width: "100%" }}>
+        <View style={{ width: "85%" }}>
           <FlatList
-            style={{ width: "100%", height: "60%" }}
+            style={{ width: "100%", height: "65%" }}
             data={students}
             extraData={selectedStudents}
             keyExtractor={(student) => student}
@@ -158,12 +146,23 @@ const AttendanceAdd = ({ route }) => {
             )}
           ></FlatList>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleAttendanceSave}
-          >
-            <Text>Save Attendance</Text>
-          </TouchableOpacity>
+          {hasClickedItem && (
+            <View style={{ flexDirection: "row", alignSelf: "center" }}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: "grey" }]}
+                onPress={handleCancelSelection}
+              >
+                <Text style={styles.dateText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleAttendanceSave}
+                style={styles.button}
+              >
+                <Text style={styles.dateText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       ) : (
         <Text style={styles.text}>No students found under this batch.</Text>
@@ -175,7 +174,6 @@ const AttendanceAdd = ({ route }) => {
 export default AttendanceAdd;
 
 const styles = StyleSheet.create({
-  
   selected: {
     backgroundColor: "green",
   },
@@ -196,12 +194,12 @@ const styles = StyleSheet.create({
     elevation: 2,
     backgroundColor: "#2196F3",
   },
-  dateText:{
+  dateText: {
     color: "white",
     fontFamily: "Jost_400Regular",
     fontSize: 16,
   },
-  datePickerContainer: {  
+  datePickerContainer: {
     flexDirection: "column",
     backgroundColor: "#2196F3",
     padding: 20,

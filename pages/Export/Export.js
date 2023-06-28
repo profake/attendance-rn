@@ -5,7 +5,6 @@ import * as FileSystem from "expo-file-system";
 import { StorageAccessFramework } from "expo-file-system";
 import { useState } from "react";
 import { useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import { getAllBatches } from "../../model/batch";
 import { getAttendanceData } from "../../model/attendance";
